@@ -1,5 +1,6 @@
 #include "mw_application.h"
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include "mw_assert.h"
@@ -10,6 +11,7 @@ GLFWwindow* window;
 void mw_app_start(mw_app_info info) {
   MW_ASSERT(glfwInit());
 
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   window = glfwCreateWindow(info.size.x, info.size.y, info.title, NULL, NULL);
   MW_ASSERT(window);
 
