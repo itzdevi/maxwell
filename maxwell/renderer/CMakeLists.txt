@@ -1,0 +1,18 @@
+add_library(renderer STATIC
+    src/mw_renderer.c
+    src/mw_instance.c
+    src/mw_surface.c
+)
+
+find_package(Vulkan REQUIRED)
+
+target_link_libraries(renderer PUBLIC
+    Vulkan::Vulkan
+    core
+    math
+    application
+)
+
+target_include_directories(renderer PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
