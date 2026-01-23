@@ -7,10 +7,6 @@
 
 #include "assert.h"
 
-#define MAX_INT 4294967295
-
-int clamp(int x, int low, int high) { return MIN(high, MAX(low, x)); }
-
 char* readFile(const char* filename, unsigned int* sizeOut) {
   FILE* file;
   unsigned char* buffer;
@@ -59,9 +55,6 @@ char* readFile(const char* filename, unsigned int* sizeOut) {
   return buffer;
 }
 
-VkImage* swapchainImages;
-VkFormat swapchainImageFormat;
-VkExtent2D swapchainExtent;
 VkImageView* swapchainImageViews;
 VkRenderPass renderPass;
 VkPipelineLayout pipelineLayout;
@@ -85,32 +78,6 @@ VkShaderModule createShaderModule(const char* code, unsigned int size) {
   MW_ASSERT(vkCreateShaderModule(device, &createInfo, NULL, &shaderModule) ==
             VK_SUCCESS);
   return shaderModule;
-}
-
-void createImageViews() {
-  swapchainImageViews = malloc(swapchainImageCount * sizeof(VkImageView));
-
-  for (size_t i = 0; i < swapchainImageCount; i++) {
-    VkImageViewCreateInfo createInfo = {0};
-    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image = swapchainImages[i];
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format = swapchainImageFormat;
-
-    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    createInfo.subresourceRange.baseMipLevel = 0;
-    createInfo.subresourceRange.levelCount = 1;
-    createInfo.subresourceRange.baseArrayLayer = 0;
-    createInfo.subresourceRange.layerCount = 1;
-
-    MW_ASSERT(vkCreateImageView(device, &createInfo, NULL,
-                                &swapchainImageViews[i]) == VK_SUCCESS);
-  }
 }
 
 void createGraphicsPipeline() {

@@ -1,6 +1,6 @@
 #include "mw_physical_device.h"
 
-#include "mw_core.h"
+#include "mw_assert.h"
 #include "mw_device.h"
 #include "mw_render_queue.h"
 #include "mw_swapchain.h"
@@ -13,7 +13,7 @@ int is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
 
   int swapChainAdequate = 0;
   if (extensionsSupported) {
-    mw_renderer_swapchain_support_details details =
+    mw_swapchain_support_details details =
         mw_renderer_create_swapchain_support_details(device, surface);
 
     swapChainAdequate = details.formatsCount && details.presentModesCount;

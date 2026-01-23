@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "mw_core.h"
+#include "mw_assert.h"
 #include "mw_physical_device.h"
 #include "mw_render_queue.h"
 

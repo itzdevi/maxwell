@@ -1,9 +1,9 @@
 #include "mw_surface.h"
 
-#include "mw_application.h"
-#include "mw_core.h"
-
 #include <stdio.h>
+
+#include "mw_application.h"
+#include "mw_assert.h"
 
 VkSurfaceKHR mw_renderer_create_surface(VkInstance instance) {
   VkSurfaceKHR surface;

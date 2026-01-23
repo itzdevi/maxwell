@@ -5,11 +5,9 @@
 #include <string.h>
 
 #include "mw_application.h"
-#include "mw_core.h"
+#include "mw_assert.h"
 
-// --- Validation Layers ---
-
-const char *validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
+const char* validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
 
 #ifdef NDEBUG
 int enableValidationLayers = 0;
@@ -19,12 +17,11 @@ int enableValidationLayers = 1;
 
 static VkDebugUtilsMessengerEXT debugMessenger;
 
-static int
-mw_renderer_check_validation_layer_support() {
+static int mw_renderer_check_validation_layer_support() {
   unsigned int layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, NULL);
 
-  VkLayerProperties *availableLayers =
+  VkLayerProperties* availableLayers =
       malloc(layerCount * sizeof(VkLayerProperties));
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers);
 
@@ -51,9 +48,8 @@ mw_renderer_check_validation_layer_support() {
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType,
-              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-              void *pUserData) {
-
+              const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+              void* pUserData) {
   if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
     fprintf(stderr, "validation layer: %s\n", pCallbackData->pMessage);
   }
@@ -61,8 +57,8 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
   return VK_FALSE;
 }
 
-static void
-populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT *createInfo) {
+static void populateDebugMessengerCreateInfo(
+    VkDebugUtilsMessengerCreateInfoEXT* createInfo) {
   createInfo->sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   createInfo->messageSeverity =
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -75,12 +71,11 @@ populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT *createInfo)
   createInfo->pUserData = NULL;
 }
 
-// --- Instance Creation ---
-
-VkInstance mw_renderer_create_instance(const char *title) {
+VkInstance mw_renderer_create_instance(const char* title) {
   if (enableValidationLayers && !mw_renderer_check_validation_layer_support()) {
-    printf("Warning: Validation layers requested, but not available! "
-           "Disabling validation layers.\n");
+    printf(
+        "Warning: Validation layers requested, but not available! "
+        "Disabling validation layers.\n");
     enableValidationLayers = 0;
   }
 
@@ -97,14 +92,14 @@ VkInstance mw_renderer_create_instance(const char *title) {
   createInfo.pApplicationInfo = &appInfo;
 
   unsigned int glfwExtensionCount = 0;
-  const char **glfwExtensions = mw_app_get_extensions(&glfwExtensionCount);
+  const char** glfwExtensions = mw_app_get_extensions(&glfwExtensionCount);
 
   unsigned int extensionCount = glfwExtensionCount;
   if (enableValidationLayers) {
     extensionCount += 1;
   }
 
-  const char **extensions = malloc(extensionCount * sizeof(const char *));
+  const char** extensions = malloc(extensionCount * sizeof(const char*));
   for (int i = 0; i < glfwExtensionCount; ++i) {
     extensions[i] = glfwExtensions[i];
   }
@@ -122,7 +117,7 @@ VkInstance mw_renderer_create_instance(const char *title) {
         sizeof(validationLayers) / sizeof(validationLayers[0]);
     createInfo.ppEnabledLayerNames = validationLayers;
     populateDebugMessengerCreateInfo(&debugCreateInfo);
-    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
   } else {
     createInfo.enabledLayerCount = 0;
     createInfo.pNext = NULL;
@@ -133,7 +128,6 @@ VkInstance mw_renderer_create_instance(const char *title) {
 
   free(extensions);
 
-  // Setup debug messenger
   if (enableValidationLayers) {
     VkDebugUtilsMessengerCreateInfoEXT messengerCreateInfo = {0};
     populateDebugMessengerCreateInfo(&messengerCreateInfo);
