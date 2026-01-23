@@ -5,6 +5,7 @@ add_library(renderer STATIC
     src/mw_physical_device.c
     src/mw_swapchain.c
     src/mw_device.c
+    src/mw_render_queue.c
 )
 
 find_package(Vulkan REQUIRED)

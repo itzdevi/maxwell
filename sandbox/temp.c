@@ -60,10 +60,6 @@ char* readFile(const char* filename, unsigned int* sizeOut) {
   return buffer;
 }
 
-GLFWwindow* window;
-VkInstance instance;
-VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-VkDevice device;
 VkQueue graphicsQueue;
 VkSurfaceKHR surface;
 VkQueue presentQueue;
@@ -134,44 +130,7 @@ VkShaderModule createShaderModule(const char* code, unsigned int size) {
   return shaderModule;
 }
 
-void createLogicalDevice() {
-  struct QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
-
-  float queuePriority = 1.0f;
-
-  uint32_t uniqueQueueFamilies[2];
-  uint32_t queueCount = 0;
-
-  uniqueQueueFamilies[queueCount++] = indices.graphicsFamily;
-  if (indices.presentFamily != indices.graphicsFamily)
-    uniqueQueueFamilies[queueCount++] = indices.presentFamily;
-
-  VkDeviceQueueCreateInfo queueCreateInfos[2] = {0};
-  for (uint32_t i = 0; i < queueCount; i++) {
-    queueCreateInfos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfos[i].queueFamilyIndex = uniqueQueueFamilies[i];
-    queueCreateInfos[i].queueCount = 1;
-    queueCreateInfos[i].pQueuePriorities = &queuePriority;
-  }
-
-  VkDeviceCreateInfo createInfo = {0};
-  createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createInfo.queueCreateInfoCount = queueCount;
-  createInfo.pQueueCreateInfos = queueCreateInfos;
-
-  VkPhysicalDeviceFeatures deviceFeatures = {0};
-  createInfo.pEnabledFeatures = &deviceFeatures;
-
-  createInfo.enabledExtensionCount =
-      sizeof(deviceExtensions) / sizeof(deviceExtensions[0]);
-  createInfo.ppEnabledExtensionNames = deviceExtensions;
-
-  MW_ASSERT(vkCreateDevice(physicalDevice, &createInfo, NULL, &device) ==
-            VK_SUCCESS);
-
-  vkGetDeviceQueue(device, indices.presentFamily, 0, &presentQueue);
-  vkGetDeviceQueue(device, indices.graphicsFamily, 0, &graphicsQueue);
-}
+void createLogicalDevice() {}
 
 void createSwapchain() {
   struct SwapchainSupportDetails details =
