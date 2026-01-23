@@ -1,5 +1,6 @@
 add_library(math STATIC
     src/mw_vec2.c
+    src/mw_math_func.c
 )
 target_link_libraries(math PRIVATE
     core

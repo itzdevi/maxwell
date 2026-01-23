@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/param.h>
 #include <vulkan/vulkan.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -60,10 +59,6 @@ char* readFile(const char* filename, unsigned int* sizeOut) {
   return buffer;
 }
 
-VkQueue graphicsQueue;
-VkSurfaceKHR surface;
-VkQueue presentQueue;
-VkSwapchainKHR swapchain;
 VkImage* swapchainImages;
 VkFormat swapchainImageFormat;
 VkExtent2D swapchainExtent;
@@ -80,44 +75,6 @@ VkFence inFlightFence;
 
 unsigned int swapchainImageCount;
 
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR* availableFormats,
-                                           unsigned int availableFormatsCount) {
-  for (size_t i = 0; i < availableFormatsCount; i++)
-    if (availableFormats[i].format == VK_FORMAT_B8G8R8_SRGB &&
-        availableFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-      return availableFormats[i];
-
-  return availableFormats[0];
-}
-
-VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR* availablePresentModes,
-                                       unsigned int presentModesCount) {
-  for (size_t i = 0; i < presentModesCount; i++)
-    if (availablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-      return availablePresentModes[i];
-
-  return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-VkExtent2D chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities) {
-  if (capabilities.currentExtent.width != MAX_INT)
-    return capabilities.currentExtent;
-  else {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-
-    VkExtent2D actualExtent = {(unsigned int)width, (unsigned int)height};
-    actualExtent.width =
-        clamp(actualExtent.width, capabilities.minImageExtent.width,
-              capabilities.maxImageExtent.width);
-    actualExtent.height =
-        clamp(actualExtent.height, capabilities.minImageExtent.height,
-              capabilities.maxImageExtent.height);
-
-    return actualExtent;
-  }
-}
-
 VkShaderModule createShaderModule(const char* code, unsigned int size) {
   VkShaderModuleCreateInfo createInfo = {0};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -128,71 +85,6 @@ VkShaderModule createShaderModule(const char* code, unsigned int size) {
   MW_ASSERT(vkCreateShaderModule(device, &createInfo, NULL, &shaderModule) ==
             VK_SUCCESS);
   return shaderModule;
-}
-
-void createLogicalDevice() {}
-
-void createSwapchain() {
-  struct SwapchainSupportDetails details =
-      querySwapchainSupport(physicalDevice);
-
-  VkSurfaceFormatKHR surfaceFormat =
-      chooseSwapSurfaceFormat(details.formats, details.formatsCount);
-  VkPresentModeKHR presentMode =
-      chooseSwapPresentMode(details.presentModes, details.presentModesCount);
-  VkExtent2D extent = chooseSwapExtent(details.capabilities);
-
-  swapchainImageCount = details.capabilities.minImageCount + 1;
-  if (details.capabilities.maxImageCount > 0 &&
-      swapchainImageCount > details.capabilities.maxImageCount) {
-    swapchainImageCount = details.capabilities.maxImageCount;
-  }
-
-  VkSwapchainCreateInfoKHR createInfo = {0};
-  createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface = surface;
-
-  createInfo.minImageCount = swapchainImageCount;
-  createInfo.imageFormat = surfaceFormat.format;
-  createInfo.imageColorSpace = surfaceFormat.colorSpace;
-  createInfo.imageArrayLayers = 1;
-  createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-  createInfo.imageExtent = extent;
-
-  struct QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
-  unsigned int queueFamilyIndices[] = {indices.graphicsFamily,
-                                       indices.presentFamily};
-
-  if (indices.graphicsFamily != indices.presentFamily) {
-    createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    createInfo.queueFamilyIndexCount = 2;
-    createInfo.pQueueFamilyIndices = queueFamilyIndices;
-  } else {
-    createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    createInfo.queueFamilyIndexCount = 0;
-    createInfo.pQueueFamilyIndices = NULL;
-  }
-
-  createInfo.preTransform = details.capabilities.currentTransform;
-  createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-
-  createInfo.presentMode = presentMode;
-  createInfo.clipped = VK_TRUE;
-
-  createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-  MW_ASSERT(vkCreateSwapchainKHR(device, &createInfo, NULL, &swapchain) ==
-            VK_SUCCESS);
-
-  vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, NULL);
-  swapchainImages = malloc(swapchainImageCount * sizeof(VkImage));
-  vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount,
-                          swapchainImages);
-
-  swapchainImageFormat = surfaceFormat.format;
-  swapchainExtent = extent;
-
-  freeSwapchainSupportDetails(details);
 }
 
 void createImageViews() {

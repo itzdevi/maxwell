@@ -41,7 +41,7 @@ int mw_renderer_check_device_extension_support(VkPhysicalDevice device) {
 VkDevice mw_renderer_create_device(VkPhysicalDevice physicalDevice,
                                    VkSurfaceKHR surface, VkQueue* presentQueue,
                                    VkQueue* graphicsQueue) {
-  struct QueueFamilyIndices indices =
+  struct mw_renderer_queue_family_indices indices =
       mw_renderer_find_queue_families(physicalDevice, surface);
 
   float queuePriority = 1.0f;

@@ -32,3 +32,7 @@ const char** mw_app_get_extensions(int* extensionCount) {
 VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface) {
   return glfwCreateWindowSurface(instance, window, NULL, surface);
 }
+
+void mw_app_get_framebuffer_size(int* width, int* height) {
+  glfwGetFramebufferSize(window, width, height);
+}
