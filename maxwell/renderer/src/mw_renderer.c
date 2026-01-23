@@ -24,6 +24,26 @@ mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
 mw_command_buffers commandBuffers;
 mw_sync_objects syncObjects;
+int framebufferResized = 0;
+
+void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
+                           VkFramebuffer** framebuffers,
+                           VkPhysicalDevice physicalDevice,
+                           VkSurfaceKHR surface, mw_pipeline pipeline) {
+  mw_vec2 size = mw_app_get_framebuffer_size();
+  while (size.x == 0 || size.y == 0) {
+    size = mw_app_get_framebuffer_size();
+    mw_app_wait_events();
+  }
+
+  vkDeviceWaitIdle(device.device);
+
+  mw_renderer_destroy_framebuffers(device, *swapchain, *framebuffers);
+  mw_renderer_destroy_swapchain(device, *swapchain);
+
+  *swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
+  *framebuffers = mw_renderer_create_framebuffers(device, *swapchain, pipeline);
+}
 
 void mw_renderer_initialize(mw_app_info info) {
   instance = mw_renderer_create_instance(info.title);
@@ -54,12 +74,20 @@ unsigned int currentFrame;
 void mw_renderer_draw_frame() {
   vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame],
                   VK_TRUE, UINT64_MAX);
-  vkResetFences(device.device, 1, &syncObjects.inFlightFences[currentFrame]);
 
   unsigned int imageIndex;
-  vkAcquireNextImageKHR(device.device, swapchain.swapchain, UINT64_MAX,
-                        syncObjects.imageAvailableSemaphores[currentFrame],
-                        VK_NULL_HANDLE, &imageIndex);
+  VkResult result =
+      vkAcquireNextImageKHR(device.device, swapchain.swapchain, UINT64_MAX,
+                            syncObjects.imageAvailableSemaphores[currentFrame],
+                            VK_NULL_HANDLE, &imageIndex);
+  if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    mw_recreate_swapchain(device, &swapchain, &framebuffers, physicalDevice,
+                          surface, pipeline);
+    return;
+  } else
+    MW_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
+
+  vkResetFences(device.device, 1, &syncObjects.inFlightFences[currentFrame]);
 
   vkResetCommandBuffer(commandBuffers.buffers[currentFrame], 0);
   mw_renderer_record_command_buffer(swapchain, pipeline, commandBuffers,
@@ -98,9 +126,18 @@ void mw_renderer_draw_frame() {
   presentInfo.pSwapchains = swapchains;
   presentInfo.pImageIndices = &imageIndex;
 
-  vkQueuePresentKHR(device.presentQueue, &presentInfo);
+  result = vkQueuePresentKHR(device.presentQueue, &presentInfo);
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+      framebufferResized) {
+    framebufferResized = 0;
+    mw_recreate_swapchain(device, &swapchain, &framebuffers, physicalDevice,
+                          surface, pipeline);
+  } else
+    MW_ASSERT(result == VK_SUCCESS);
 
   currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void mw_renderer_wait_for_idle() { vkDeviceWaitIdle(device.device); }
+
+void mw_renderer_update_framebuffer_resized() { framebufferResized = 1; }

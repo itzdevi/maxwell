@@ -6,6 +6,7 @@
 
 #include "mw_application.h"
 #include "mw_assert.h"
+#include "mw_framebuffer.h"
 #include "mw_math.h"
 #include "mw_render_queue.h"
 
@@ -23,10 +24,9 @@ VkExtent2D mw_choose_swap_extent(VkSurfaceCapabilitiesKHR capabilities) {
   if (capabilities.currentExtent.width != UINT32_MAX)
     return capabilities.currentExtent;
   else {
-    int width, height;
-    mw_app_get_framebuffer_size(&width, &height);
+    mw_vec2 size = mw_app_get_framebuffer_size();
 
-    VkExtent2D actualExtent = {(unsigned int)width, (unsigned int)height};
+    VkExtent2D actualExtent = {(unsigned int)size.x, (unsigned int)size.y};
     actualExtent.width =
         mw_clamp(actualExtent.width, capabilities.minImageExtent.width,
                  capabilities.maxImageExtent.width);
@@ -200,6 +200,6 @@ void mw_renderer_destroy_swapchain(mw_device device, mw_swapchain swapchain) {
   free(swapchain.images);
 
   for (size_t i = 0; i < swapchain.imageCount; i++)
-    free(swapchain.imageViews[i]);
+    vkDestroyImageView(device.device, swapchain.imageViews[i], NULL);
   free(swapchain.imageViews);
 }

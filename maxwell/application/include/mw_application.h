@@ -13,6 +13,7 @@ typedef struct mw_app_info {
 void mw_app_start(mw_app_info info);
 const char** mw_app_get_extensions(int* extensionCount);
 VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface);
-void mw_app_get_framebuffer_size(int* width, int* height);
+mw_vec2 mw_app_get_framebuffer_size();
+void mw_app_wait_events();
 
 #endif
