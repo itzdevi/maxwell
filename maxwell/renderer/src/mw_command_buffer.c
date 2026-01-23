@@ -22,13 +22,14 @@ VkCommandPool mw_create_command_pool(VkDevice device,
 
 void mw_renderer_record_command_buffer(mw_swapchain swapchain,
                                        mw_pipeline pipeline,
-                                       mw_command_buffer commandBuffer,
+                                       mw_command_buffers commandBuffer,
                                        VkFramebuffer* framebuffers,
-                                       unsigned int imageIndex) {
+                                       unsigned int imageIndex,
+                                       unsigned int frameIndex) {
   VkCommandBufferBeginInfo commandBufferBeginInfo = {0};
   commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-  MW_ASSERT(vkBeginCommandBuffer(commandBuffer.buffer,
+  MW_ASSERT(vkBeginCommandBuffer(commandBuffer.buffers[frameIndex],
                                  &commandBufferBeginInfo) == VK_SUCCESS);
 
   VkRenderPassBeginInfo renderPassBeginInfo = {0};
@@ -44,10 +45,10 @@ void mw_renderer_record_command_buffer(mw_swapchain swapchain,
   renderPassBeginInfo.clearValueCount = 1;
   renderPassBeginInfo.pClearValues = &clearColor;
 
-  vkCmdBeginRenderPass(commandBuffer.buffer, &renderPassBeginInfo,
+  vkCmdBeginRenderPass(commandBuffer.buffers[frameIndex], &renderPassBeginInfo,
                        VK_SUBPASS_CONTENTS_INLINE);
-  vkCmdBindPipeline(commandBuffer.buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    pipeline.pipeline);
+  vkCmdBindPipeline(commandBuffer.buffers[frameIndex],
+                    VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
   VkViewport viewport = {0};
   viewport.x = 0;
@@ -56,36 +57,41 @@ void mw_renderer_record_command_buffer(mw_swapchain swapchain,
   viewport.height = (float)swapchain.extent.height;
   viewport.minDepth = 0;
   viewport.maxDepth = 1;
-  vkCmdSetViewport(commandBuffer.buffer, 0, 1, &viewport);
+  vkCmdSetViewport(commandBuffer.buffers[frameIndex], 0, 1, &viewport);
 
   VkRect2D scissor = {0};
   scissor.offset = offset;
   scissor.extent = swapchain.extent;
-  vkCmdSetScissor(commandBuffer.buffer, 0, 1, &scissor);
+  vkCmdSetScissor(commandBuffer.buffers[frameIndex], 0, 1, &scissor);
 
-  vkCmdDraw(commandBuffer.buffer, 3, 1, 0, 0);
-  vkCmdEndRenderPass(commandBuffer.buffer);
-  MW_ASSERT(vkEndCommandBuffer(commandBuffer.buffer) == VK_SUCCESS);
+  vkCmdDraw(commandBuffer.buffers[frameIndex], 3, 1, 0, 0);
+  vkCmdEndRenderPass(commandBuffer.buffers[frameIndex]);
+  MW_ASSERT(vkEndCommandBuffer(commandBuffer.buffers[frameIndex]) ==
+            VK_SUCCESS);
 }
 
-mw_command_buffer mw_renderer_create_command_buffer(
-    mw_device device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
-  mw_command_buffer buffer;
-  buffer.pool = mw_create_command_pool(device.device, physicalDevice, surface);
+mw_command_buffers mw_renderer_create_command_buffers(
+    mw_device device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface,
+    const unsigned int maxFramesInFlight) {
+  mw_command_buffers buffers;
+  buffers.buffers = malloc(maxFramesInFlight * sizeof(VkCommandBuffer));
+  buffers.pool = mw_create_command_pool(device.device, physicalDevice, surface);
 
   VkCommandBufferAllocateInfo commandBufferAllocInfo = {0};
   commandBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  commandBufferAllocInfo.commandBufferCount = 1;
-  commandBufferAllocInfo.commandPool = buffer.pool;
+  commandBufferAllocInfo.commandBufferCount = maxFramesInFlight;
+  commandBufferAllocInfo.commandPool = buffers.pool;
   commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
   MW_ASSERT(vkAllocateCommandBuffers(device.device, &commandBufferAllocInfo,
-                                     &buffer.buffer) == VK_SUCCESS);
+                                     buffers.buffers) == VK_SUCCESS);
 
-  return buffer;
+  return buffers;
 }
 
-void mw_renderer_destroy_command_buffer(mw_device device,
-                                        mw_command_buffer buffer) {
-  vkDestroyCommandPool(device.device, buffer.pool, NULL);
+void mw_renderer_destroy_command_buffers(mw_device device,
+                                         mw_command_buffers buffers) {
+  vkDestroyCommandPool(device.device, buffers.pool, NULL);
+
+  free(buffers.buffers);
 }
