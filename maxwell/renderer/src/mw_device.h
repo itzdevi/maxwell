@@ -3,10 +3,15 @@
 
 #include <vulkan/vulkan.h>
 
+typedef struct mw_device {
+  VkDevice device;
+  VkQueue presentQueue;
+  VkQueue graphicsQueue;
+} mw_device;
+
 int mw_renderer_check_device_extension_support(VkPhysicalDevice device);
-VkDevice mw_renderer_create_device(VkPhysicalDevice physicalDevice,
-                                   VkSurfaceKHR surface, VkQueue* presentQueue,
-                                   VkQueue* graphicsQueue);
-void mw_renderer_destroy_device(VkDevice device);
+mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
+                                    VkSurfaceKHR surface);
+void mw_renderer_destroy_device(mw_device device);
 
 #endif

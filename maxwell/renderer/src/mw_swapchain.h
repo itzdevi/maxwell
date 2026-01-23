@@ -3,6 +3,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "mw_device.h"
+
 typedef struct mw_swapchain_support_details {
   VkSurfaceCapabilitiesKHR capabilities;
   unsigned int formatsCount;
@@ -27,7 +29,7 @@ void mw_renderer_free_swapchain_support_details(
 
 mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
                                           VkSurfaceKHR surface,
-                                          VkDevice device);
-void mw_renderer_destroy_swapchain(VkDevice device, mw_swapchain swapchain);
+                                          mw_device device);
+void mw_renderer_destroy_swapchain(mw_device device, mw_swapchain swapchain);
 
 #endif

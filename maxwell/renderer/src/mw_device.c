@@ -38,9 +38,10 @@ int mw_renderer_check_device_extension_support(VkPhysicalDevice device) {
   return 1;
 }
 
-VkDevice mw_renderer_create_device(VkPhysicalDevice physicalDevice,
-                                   VkSurfaceKHR surface, VkQueue* presentQueue,
-                                   VkQueue* graphicsQueue) {
+mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
+                                    VkSurfaceKHR surface) {
+  mw_device device;
+
   struct mw_renderer_queue_family_indices indices =
       mw_renderer_find_queue_families(physicalDevice, surface);
 
@@ -73,15 +74,16 @@ VkDevice mw_renderer_create_device(VkPhysicalDevice physicalDevice,
       sizeof(deviceExtensions) / sizeof(deviceExtensions[0]);
   createInfo.ppEnabledExtensionNames = deviceExtensions;
 
-  VkDevice device;
-  MW_ASSERT(vkCreateDevice(physicalDevice, &createInfo, NULL, &device) ==
+  MW_ASSERT(vkCreateDevice(physicalDevice, &createInfo, NULL, &device.device) ==
             VK_SUCCESS);
 
-  vkGetDeviceQueue(device, indices.presentFamily, 0, presentQueue);
-  vkGetDeviceQueue(device, indices.graphicsFamily, 0, graphicsQueue);
+  vkGetDeviceQueue(device.device, indices.presentFamily, 0,
+                   &device.presentQueue);
+  vkGetDeviceQueue(device.device, indices.graphicsFamily, 0,
+                   &device.graphicsQueue);
   return device;
 }
 
-void mw_renderer_destroy_device(VkDevice device) {
-  vkDestroyDevice(device, NULL);
+void mw_renderer_destroy_device(mw_device device) {
+  vkDestroyDevice(device.device, NULL);
 }

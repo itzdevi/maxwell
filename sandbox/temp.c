@@ -55,7 +55,6 @@ char* readFile(const char* filename, unsigned int* sizeOut) {
   return buffer;
 }
 
-VkImageView* swapchainImageViews;
 VkRenderPass renderPass;
 VkPipelineLayout pipelineLayout;
 VkPipeline graphicsPipeline;

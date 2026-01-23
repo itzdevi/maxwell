@@ -9,17 +9,14 @@
 VkInstance instance;
 VkSurfaceKHR surface;
 VkPhysicalDevice physicalDevice;
-VkDevice device;
-VkQueue presentQueue;
-VkQueue graphicsQueue;
+mw_device device;
 mw_swapchain swapchain;
 
 void mw_renderer_initialize(mw_app_info info) {
   instance = mw_renderer_create_instance(info.title);
   surface = mw_renderer_create_surface(instance);
   physicalDevice = mw_renderer_pick_physical_device(instance, surface);
-  device = mw_renderer_create_device(physicalDevice, surface, &presentQueue,
-                                     &graphicsQueue);
+  device = mw_renderer_create_device(physicalDevice, surface);
   swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
 }
 

@@ -115,7 +115,7 @@ VkImageView* mw_create_image_views(VkDevice device, VkFormat imageFormat,
 
 mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
                                           VkSurfaceKHR surface,
-                                          VkDevice device) {
+                                          mw_device device) {
   mw_swapchain_support_details details =
       mw_renderer_create_swapchain_support_details(physicalDevice, surface);
 
@@ -171,12 +171,12 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   createInfo.oldSwapchain = VK_NULL_HANDLE;
 
   VkSwapchainKHR swapchain;
-  MW_ASSERT(vkCreateSwapchainKHR(device, &createInfo, NULL, &swapchain) ==
-            VK_SUCCESS);
+  MW_ASSERT(vkCreateSwapchainKHR(device.device, &createInfo, NULL,
+                                 &swapchain) == VK_SUCCESS);
 
-  vkGetSwapchainImagesKHR(device, swapchain, &imageCount, NULL);
+  vkGetSwapchainImagesKHR(device.device, swapchain, &imageCount, NULL);
   VkImage* images = malloc(imageCount * sizeof(VkImage));
-  vkGetSwapchainImagesKHR(device, swapchain, &imageCount, images);
+  vkGetSwapchainImagesKHR(device.device, swapchain, &imageCount, images);
 
   VkFormat imageFormat = surfaceFormat.format;
 
@@ -187,15 +187,15 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   sc.imageFormat = imageFormat;
   sc.extent = extent;
   sc.imageViews =
-      mw_create_image_views(device, imageFormat, imageCount, images);
+      mw_create_image_views(device.device, imageFormat, imageCount, images);
 
   mw_renderer_free_swapchain_support_details(details);
 
   return sc;
 }
 
-void mw_renderer_destroy_swapchain(VkDevice device, mw_swapchain swapchain) {
-  vkDestroySwapchainKHR(device, swapchain.swapchain, NULL);
+void mw_renderer_destroy_swapchain(mw_device device, mw_swapchain swapchain) {
+  vkDestroySwapchainKHR(device.device, swapchain.swapchain, NULL);
 
   free(swapchain.images);
 
