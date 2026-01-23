@@ -5,5 +5,7 @@
 
 void mw_renderer_initialize(mw_app_info info);
 void mw_renderer_cleanup();
+void mw_renderer_draw_frame();
+void mw_renderer_wait_for_idle();
 
 #endif

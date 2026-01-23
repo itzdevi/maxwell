@@ -195,6 +195,8 @@ mw_pipeline mw_renderer_create_pipeline(mw_device device,
 
   vkDestroyShaderModule(device.device, vertShaderModule, NULL);
   vkDestroyShaderModule(device.device, fragShaderModule, NULL);
+
+  return pipeline;
 }
 
 void mw_renderer_destroy_pipeline(mw_device device, mw_pipeline pipeline) {

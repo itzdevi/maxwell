@@ -9,6 +9,7 @@ add_library(renderer STATIC
     src/mw_pipeline.c
     src/mw_framebuffer.c
     src/mw_command_buffer.c
+    src/mw_sync_objects.c
 )
 
 find_package(Vulkan REQUIRED)

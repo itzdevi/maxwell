@@ -19,7 +19,9 @@ void mw_app_start(mw_app_info info) {
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
+    mw_renderer_draw_frame();
   }
+  mw_renderer_wait_for_idle();
 
   glfwDestroyWindow(window);
   glfwTerminate();
