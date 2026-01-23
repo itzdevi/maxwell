@@ -2,6 +2,9 @@ add_library(renderer STATIC
     src/mw_renderer.c
     src/mw_instance.c
     src/mw_surface.c
+    src/mw_physical_device.c
+    src/mw_swapchain.c
+    src/mw_device.c
 )
 
 find_package(Vulkan REQUIRED)

@@ -84,119 +84,6 @@ VkFence inFlightFence;
 
 unsigned int swapchainImageCount;
 
-struct QueueFamilyIndices {
-  int graphicsFamily;
-  int presentFamily;
-};
-
-struct SwapchainSupportDetails {
-  VkSurfaceCapabilitiesKHR capabilities;
-  unsigned int formatsCount;
-  VkSurfaceFormatKHR* formats;
-  unsigned int presentModesCount;
-  VkPresentModeKHR* presentModes;
-};
-
-const char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-
-struct QueueFamilyIndices createEmptyQueueFamilies() {
-  struct QueueFamilyIndices indices = {-1, -1};
-  return indices;
-}
-
-int checkQueueFamilies(struct QueueFamilyIndices indices) {
-  return indices.graphicsFamily != -1 && indices.presentFamily != -1;
-}
-
-struct QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
-  struct QueueFamilyIndices indices = createEmptyQueueFamilies();
-
-  unsigned int queueFamilyCount = 0;
-  vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, NULL);
-
-  VkQueueFamilyProperties queueFamilies[queueFamilyCount];
-  vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount,
-                                           queueFamilies);
-
-  for (size_t i = 0; i < queueFamilyCount; i++) {
-    if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-      indices.graphicsFamily = i;
-
-    VkBool32 presentSupport = VK_FALSE;
-    vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-    if (presentSupport) indices.presentFamily = i;
-
-    if (checkQueueFamilies(indices)) break;
-  }
-
-  return indices;
-}
-
-int checkDeviceExtensionSupport(VkPhysicalDevice device) {
-  unsigned int extensionCount = 0;
-  vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
-
-  VkExtensionProperties availableExtensions[extensionCount];
-  vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount,
-                                       availableExtensions);
-
-  int requiredExtensionsCount =
-      sizeof(deviceExtensions) / sizeof(deviceExtensions[0]);
-  int usedFlags[requiredExtensionsCount];
-  memset(usedFlags, 0, requiredExtensionsCount * sizeof(int));
-
-  for (size_t i = 0; i < extensionCount; i++) {
-    char* extensionName = availableExtensions[i].extensionName;
-    int extensionNameLen = strlen(extensionName);
-    for (size_t j = 0; j < requiredExtensionsCount; j++) {
-      if (!strcmp(extensionName, deviceExtensions[j])) {
-        usedFlags[j] = 1;
-      }
-    }
-  }
-
-  for (size_t i = 0; i < requiredExtensionsCount; i++) {
-    if (!usedFlags[i]) return 0;
-  }
-
-  return 1;
-}
-
-struct SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device) {
-  struct SwapchainSupportDetails details;
-
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
-                                            &details.capabilities);
-
-  unsigned int formatCount = 0;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, NULL);
-  details.formatsCount = formatCount;
-
-  if (formatCount) {
-    details.formats = malloc(formatCount * sizeof(VkSurfaceFormatKHR));
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
-                                         details.formats);
-  }
-
-  unsigned int presentModeCount = 0;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
-                                            NULL);
-  details.presentModesCount = presentModeCount;
-
-  if (presentModeCount) {
-    details.presentModes = malloc(presentModeCount * sizeof(VkPresentModeKHR));
-    vkGetPhysicalDeviceSurfacePresentModesKHR(
-        device, surface, &presentModeCount, details.presentModes);
-  }
-
-  return details;
-}
-
-void freeSwapchainSupportDetails(struct SwapchainSupportDetails details) {
-  free(details.formats);
-  free(details.presentModes);
-}
-
 VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR* availableFormats,
                                            unsigned int availableFormatsCount) {
   for (size_t i = 0; i < availableFormatsCount; i++)
@@ -235,24 +122,6 @@ VkExtent2D chooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities) {
   }
 }
 
-int isDeviceSuitable(VkPhysicalDevice device) {
-  struct QueueFamilyIndices indices = findQueueFamilies(device);
-
-  int extensionsSupported = checkDeviceExtensionSupport(device);
-
-  int swapChainAdequate = 0;
-  if (extensionsSupported) {
-    struct SwapchainSupportDetails details = querySwapchainSupport(device);
-
-    swapChainAdequate = details.formatsCount && details.presentModesCount;
-
-    freeSwapchainSupportDetails(details);
-  }
-
-  return checkQueueFamilies(indices) && extensionsSupported &&
-         swapChainAdequate;
-}
-
 VkShaderModule createShaderModule(const char* code, unsigned int size) {
   VkShaderModuleCreateInfo createInfo = {0};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -263,25 +132,6 @@ VkShaderModule createShaderModule(const char* code, unsigned int size) {
   MW_ASSERT(vkCreateShaderModule(device, &createInfo, NULL, &shaderModule) ==
             VK_SUCCESS);
   return shaderModule;
-}
-
-void pickPhysicalDevice() {
-  unsigned int deviceCount = 0;
-  vkEnumeratePhysicalDevices(instance, &deviceCount, NULL);
-
-  MW_ASSERT(deviceCount);
-
-  VkPhysicalDevice devices[deviceCount];
-  vkEnumeratePhysicalDevices(instance, &deviceCount, devices);
-
-  for (size_t i = 0; i < deviceCount; i++) {
-    if (isDeviceSuitable(devices[i])) {
-      physicalDevice = devices[i];
-      break;
-    }
-  }
-
-  MW_ASSERT(physicalDevice != VK_NULL_HANDLE);
 }
 
 void createLogicalDevice() {
