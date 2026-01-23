@@ -142,7 +142,7 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
   createInfo.imageExtent = extent;
 
-  struct mw_renderer_queue_family_indices indices =
+  struct mw_queue_family_indices indices =
       mw_renderer_find_queue_families(physicalDevice, surface);
   unsigned int queueFamilyIndices[] = {indices.graphicsFamily,
                                        indices.presentFamily};

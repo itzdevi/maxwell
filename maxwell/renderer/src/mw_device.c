@@ -42,7 +42,7 @@ mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
                                     VkSurfaceKHR surface) {
   mw_device device;
 
-  struct mw_renderer_queue_family_indices indices =
+  struct mw_queue_family_indices indices =
       mw_renderer_find_queue_families(physicalDevice, surface);
 
   float queuePriority = 1.0f;

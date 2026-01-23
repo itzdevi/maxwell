@@ -1,5 +1,6 @@
 #include "mw_renderer.h"
 
+#include "mw_command_buffer.h"
 #include "mw_device.h"
 #include "mw_framebuffer.h"
 #include "mw_instance.h"
@@ -15,6 +16,7 @@ mw_device device;
 mw_swapchain swapchain;
 mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
+mw_command_buffer commandBuffer;
 
 void mw_renderer_initialize(mw_app_info info) {
   instance = mw_renderer_create_instance(info.title);
@@ -24,9 +26,12 @@ void mw_renderer_initialize(mw_app_info info) {
   swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
   pipeline = mw_renderer_create_pipeline(device, swapchain);
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
+  commandBuffer =
+      mw_renderer_create_command_buffer(device, physicalDevice, surface);
 }
 
 void mw_renderer_cleanup() {
+  mw_renderer_destroy_command_buffer(device, commandBuffer);
   mw_renderer_destroy_framebuffers(device, swapchain, framebuffers);
   mw_renderer_destroy_pipeline(device, pipeline);
   mw_renderer_destroy_swapchain(device, swapchain);

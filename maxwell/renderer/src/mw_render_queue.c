@@ -1,19 +1,17 @@
 #include "mw_render_queue.h"
 
-mw_renderer_queue_family_indices mw_renderer_create_empty_queue_families() {
-  mw_renderer_queue_family_indices indices = {-1, -1};
+mw_queue_family_indices mw_renderer_create_empty_queue_families() {
+  mw_queue_family_indices indices = {-1, -1};
   return indices;
 }
 
-int mw_renderer_check_queue_families(
-    struct mw_renderer_queue_family_indices indices) {
+int mw_renderer_check_queue_families(struct mw_queue_family_indices indices) {
   return indices.graphicsFamily != -1 && indices.presentFamily != -1;
 }
 
-mw_renderer_queue_family_indices mw_renderer_find_queue_families(
-    VkPhysicalDevice device, VkSurfaceKHR surface) {
-  mw_renderer_queue_family_indices indices =
-      mw_renderer_create_empty_queue_families();
+mw_queue_family_indices mw_renderer_find_queue_families(VkPhysicalDevice device,
+                                                        VkSurfaceKHR surface) {
+  mw_queue_family_indices indices = mw_renderer_create_empty_queue_families();
 
   unsigned int queueFamilyCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, NULL);

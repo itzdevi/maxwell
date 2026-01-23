@@ -7,37 +7,11 @@
 
 #include "assert.h"
 
-VkFramebuffer* swapchainFramebuffers;
 VkCommandPool commandPool;
 VkCommandBuffer commandBuffer;
 VkSemaphore imageAvailableSemaphore;
 VkSemaphore renderFinishedSemaphore;
 VkFence inFlightFence;
-
-unsigned int swapchainImageCount;
-
-void createCommandPool() {
-  struct QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
-
-  VkCommandPoolCreateInfo commandPoolCreateInfo = {0};
-  commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-  commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-  commandPoolCreateInfo.queueFamilyIndex = indices.graphicsFamily;
-
-  MW_ASSERT(vkCreateCommandPool(device, &commandPoolCreateInfo, NULL,
-                                &commandPool) == VK_SUCCESS);
-}
-
-void createCommandBuffer() {
-  VkCommandBufferAllocateInfo commandBufferAllocInfo = {0};
-  commandBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  commandBufferAllocInfo.commandBufferCount = 1;
-  commandBufferAllocInfo.commandPool = commandPool;
-  commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-  MW_ASSERT(vkAllocateCommandBuffers(device, &commandBufferAllocInfo,
-                                     &commandBuffer) == VK_SUCCESS);
-}
 
 void createSyncObjects() {
   VkSemaphoreCreateInfo semaphoreCreateInfo = {0};
@@ -166,9 +140,4 @@ void cleanup() {
   vkDestroyFence(device, inFlightFence, NULL);
 
   vkDestroyCommandPool(device, commandPool, NULL);
-
-  for (size_t i = 0; i < swapchainImageCount; i++)
-    vkDestroyFramebuffer(device, swapchainFramebuffers[i], NULL);
-
-  free(swapchainFramebuffers);
 }

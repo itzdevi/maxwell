@@ -3,14 +3,14 @@
 
 #include "vulkan/vulkan.h"
 
-typedef struct mw_renderer_queue_family_indices {
+typedef struct mw_queue_family_indices {
   int graphicsFamily;
   int presentFamily;
-} mw_renderer_queue_family_indices;
+} mw_queue_family_indices;
 
-mw_renderer_queue_family_indices mw_renderer_create_empty_queue_families();
-int mw_renderer_check_queue_families(mw_renderer_queue_family_indices indices);
-mw_renderer_queue_family_indices mw_renderer_find_queue_families(
-    VkPhysicalDevice device, VkSurfaceKHR surface);
+mw_queue_family_indices mw_renderer_create_empty_queue_families();
+int mw_renderer_check_queue_families(mw_queue_family_indices indices);
+mw_queue_family_indices mw_renderer_find_queue_families(VkPhysicalDevice device,
+                                                        VkSurfaceKHR surface);
 
 #endif
