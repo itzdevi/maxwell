@@ -7,6 +7,7 @@ add_library(renderer STATIC
     src/mw_device.c
     src/mw_render_queue.c
     src/mw_pipeline.c
+    src/mw_framebuffer.c
 )
 
 find_package(Vulkan REQUIRED)

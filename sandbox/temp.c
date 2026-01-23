@@ -7,7 +7,6 @@
 
 #include "assert.h"
 
-VkRenderPass renderPass;
 VkFramebuffer* swapchainFramebuffers;
 VkCommandPool commandPool;
 VkCommandBuffer commandBuffer;
@@ -16,26 +15,6 @@ VkSemaphore renderFinishedSemaphore;
 VkFence inFlightFence;
 
 unsigned int swapchainImageCount;
-
-void createFramebuffers() {
-  swapchainFramebuffers = malloc(swapchainImageCount * sizeof(VkFramebuffer));
-
-  for (size_t i = 0; i < swapchainImageCount; i++) {
-    VkImageView attachments[] = {swapchainImageViews[i]};
-
-    VkFramebufferCreateInfo framebufferCreateInfo = {0};
-    framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCreateInfo.renderPass = renderPass;
-    framebufferCreateInfo.attachmentCount = 1;
-    framebufferCreateInfo.pAttachments = attachments;
-    framebufferCreateInfo.width = swapchainExtent.width;
-    framebufferCreateInfo.height = swapchainExtent.height;
-    framebufferCreateInfo.layers = 1;
-
-    MW_ASSERT(vkCreateFramebuffer(device, &framebufferCreateInfo, NULL,
-                                  &swapchainFramebuffers[i]) == VK_SUCCESS);
-  }
-}
 
 void createCommandPool() {
   struct QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
@@ -122,14 +101,6 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer,
 }
 
 void initVulkan() {
-  createInstance();
-  createSurface();
-  pickPhysicalDevice();
-  createLogicalDevice();
-  createSwapchain();
-  createImageViews();
-  createRenderPass();
-  createGraphicsPipeline();
   createFramebuffers();
   createCommandPool();
   createCommandBuffer();
@@ -199,32 +170,5 @@ void cleanup() {
   for (size_t i = 0; i < swapchainImageCount; i++)
     vkDestroyFramebuffer(device, swapchainFramebuffers[i], NULL);
 
-  vkDestroyPipeline(device, graphicsPipeline, NULL);
-  vkDestroyPipelineLayout(device, pipelineLayout, NULL);
-  vkDestroyRenderPass(device, renderPass, NULL);
-
-  for (size_t i = 0; i < swapchainImageCount; i++)
-    vkDestroyImageView(device, swapchainImageViews[i], NULL);
-
-  vkDestroySwapchainKHR(device, swapchain, NULL);
-  vkDestroyDevice(device, NULL);
-  vkDestroySurfaceKHR(instance, surface, NULL);
-  vkDestroyInstance(instance, NULL);
-
-  glfwDestroyWindow(window);
-  glfwTerminate();
-
   free(swapchainFramebuffers);
-  free(swapchainImageViews);
-  free(swapchainImages);
-}
-
-int main() {
-  initWindow();
-  initVulkan();
-
-  mainLoop();
-
-  cleanup();
-  exit(EXIT_SUCCESS);
 }
