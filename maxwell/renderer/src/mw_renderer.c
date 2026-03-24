@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "mw_assert.h"
+#include "mw_buffer.h"
 #include "mw_command_buffer.h"
 #include "mw_device.h"
 #include "mw_framebuffer.h"
@@ -12,7 +13,6 @@
 #include "mw_surface.h"
 #include "mw_swapchain.h"
 #include "mw_sync_objects.h"
-#include "mw_vertex_buffer.h"
 
 const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -25,7 +25,7 @@ mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
 mw_command_buffers commandBuffers;
 mw_sync_objects syncObjects;
-VkBuffer vertexBuffer;
+mw_buffer vertexBuffer;
 int framebufferResized = 0;
 
 void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
@@ -56,10 +56,13 @@ void mw_renderer_initialize(mw_app_info info, mw_vertex* vertices,
   swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
   pipeline = mw_renderer_create_pipeline(device, swapchain);
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
-  vertexBuffer = mw_renderer_create_vertex_buffer(device, verticesSize);
+  vertexBuffer = mw_renderer_create_buffer(device, physicalDevice, verticesSize,
+                                           sizeof(mw_vertex));
   commandBuffers = mw_renderer_create_command_buffers(
       device, physicalDevice, surface, MAX_FRAMES_IN_FLIGHT);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT);
+
+  mw_renderer_copy_memory(vertexBuffer, vertices);
 }
 
 void mw_renderer_cleanup() {
@@ -68,7 +71,7 @@ void mw_renderer_cleanup() {
   mw_renderer_destroy_framebuffers(device, swapchain, framebuffers);
   mw_renderer_destroy_pipeline(device, pipeline);
   mw_renderer_destroy_swapchain(device, swapchain);
-  mw_renderer_destroy_vertex_buffer(device, vertexBuffer);
+  mw_renderer_destroy_buffer(device, vertexBuffer);
   mw_renderer_destroy_instance(instance);
   mw_renderer_destroy_device(device);
   mw_renderer_destroy_surface(instance, surface);
@@ -96,7 +99,8 @@ void mw_renderer_draw_frame() {
 
   vkResetCommandBuffer(commandBuffers.buffers[currentFrame], 0);
   mw_renderer_record_command_buffer(swapchain, pipeline, commandBuffers,
-                                    framebuffers, imageIndex, currentFrame);
+                                    framebuffers, vertexBuffer, imageIndex,
+                                    currentFrame);
 
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

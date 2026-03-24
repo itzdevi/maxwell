@@ -8,10 +8,8 @@ add_subdirectory(renderer)
 
 add_library(maxwell INTERFACE)
 target_link_libraries(maxwell INTERFACE
-    core
     math
     application
-    renderer
 )
 target_include_directories(maxwell INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}

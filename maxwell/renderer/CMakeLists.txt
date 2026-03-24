@@ -11,7 +11,7 @@ add_library(renderer STATIC
     src/mw_command_buffer.c
     src/mw_sync_objects.c
     src/mw_vertex.c
-    src/mw_vertex_buffer.c
+    src/mw_buffer.c
 )
 
 find_package(Vulkan REQUIRED)
