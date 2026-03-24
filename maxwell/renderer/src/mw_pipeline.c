@@ -2,6 +2,7 @@
 
 #include "mw_assert.h"
 #include "mw_file.h"
+#include "mw_renderer_vertex.h"
 
 VkShaderModule mw_create_shader_module(VkDevice device, const char* code,
                                        unsigned int size) {
@@ -99,11 +100,19 @@ mw_pipeline mw_renderer_create_pipeline(mw_device device,
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertStageCreateInfo,
                                                     fragStageCreateInfo};
 
+  VkVertexInputBindingDescription bindingDescription =
+      mw_renderer_get_vertex_binding_description();
+  VkVertexInputAttributeDescription attributeDescriptions[2] = {0};
+  mw_renderer_get_vertex_attribute_description(attributeDescriptions);
+
   VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo = {0};
   vertexInputCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputCreateInfo.vertexBindingDescriptionCount = 0;
-  vertexInputCreateInfo.vertexAttributeDescriptionCount = 0;
+  vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
+  vertexInputCreateInfo.vertexAttributeDescriptionCount =
+      sizeof(attributeDescriptions) / sizeof(VkVertexInputAttributeDescription);
+  vertexInputCreateInfo.pVertexBindingDescriptions = &bindingDescription;
+  vertexInputCreateInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyCreateInfo = {0};
   inputAssemblyCreateInfo.sType =

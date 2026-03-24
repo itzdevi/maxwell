@@ -3,5 +3,6 @@
 
 #include "mw_math_func.h"
 #include "mw_vec2.h"
+#include "mw_vec3.h"
 
 #endif

@@ -12,6 +12,7 @@
 #include "mw_surface.h"
 #include "mw_swapchain.h"
 #include "mw_sync_objects.h"
+#include "mw_vertex_buffer.h"
 
 const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -24,6 +25,7 @@ mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
 mw_command_buffers commandBuffers;
 mw_sync_objects syncObjects;
+VkBuffer vertexBuffer;
 int framebufferResized = 0;
 
 void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
@@ -45,7 +47,8 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
   *framebuffers = mw_renderer_create_framebuffers(device, *swapchain, pipeline);
 }
 
-void mw_renderer_initialize(mw_app_info info) {
+void mw_renderer_initialize(mw_app_info info, mw_vertex* vertices,
+                            uint32_t verticesSize) {
   instance = mw_renderer_create_instance(info.title);
   surface = mw_renderer_create_surface(instance);
   physicalDevice = mw_renderer_pick_physical_device(instance, surface);
@@ -53,6 +56,7 @@ void mw_renderer_initialize(mw_app_info info) {
   swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
   pipeline = mw_renderer_create_pipeline(device, swapchain);
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
+  vertexBuffer = mw_renderer_create_vertex_buffer(device, verticesSize);
   commandBuffers = mw_renderer_create_command_buffers(
       device, physicalDevice, surface, MAX_FRAMES_IN_FLIGHT);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT);
@@ -64,6 +68,7 @@ void mw_renderer_cleanup() {
   mw_renderer_destroy_framebuffers(device, swapchain, framebuffers);
   mw_renderer_destroy_pipeline(device, pipeline);
   mw_renderer_destroy_swapchain(device, swapchain);
+  mw_renderer_destroy_vertex_buffer(device, vertexBuffer);
   mw_renderer_destroy_instance(instance);
   mw_renderer_destroy_device(device);
   mw_renderer_destroy_surface(instance, surface);

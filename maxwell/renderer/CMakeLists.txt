@@ -10,6 +10,8 @@ add_library(renderer STATIC
     src/mw_framebuffer.c
     src/mw_command_buffer.c
     src/mw_sync_objects.c
+    src/mw_vertex.c
+    src/mw_vertex_buffer.c
 )
 
 find_package(Vulkan REQUIRED)
@@ -21,6 +23,7 @@ target_link_libraries(renderer PUBLIC
     application
 )
 
-target_include_directories(renderer PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(renderer
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
