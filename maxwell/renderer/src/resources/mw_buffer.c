@@ -57,3 +57,35 @@ void mw_renderer_destroy_buffer(mw_device device, mw_buffer buffer) {
   vkDestroyBuffer(device.device, buffer.buffer, NULL);
   vkFreeMemory(device.device, buffer.memory, NULL);
 }
+
+void mw_renderer_copy_buffer(mw_device device, mw_buffer srcBuffer,
+                             mw_buffer dstBuffer, mw_command transferCommand) {
+  VkCommandBufferAllocateInfo allocInfo = {0};
+  allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  allocInfo.commandPool = transferCommand.pool;
+  allocInfo.commandBufferCount = 1;
+
+  VkCommandBufferBeginInfo beginInfo = {0};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  vkBeginCommandBuffer(transferCommand.buffers[0], &beginInfo);
+
+  VkBufferCopy copyRegion = {0};
+  copyRegion.srcOffset = 0;
+  copyRegion.dstOffset = 0;
+  copyRegion.size = dstBuffer.size;
+  vkCmdCopyBuffer(transferCommand.buffers[0], srcBuffer.buffer,
+                  dstBuffer.buffer, 1, &copyRegion);
+
+  vkEndCommandBuffer(transferCommand.buffers[0]);
+
+  VkSubmitInfo submitInfo = {0};
+  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submitInfo.commandBufferCount = 1;
+  submitInfo.pCommandBuffers = &transferCommand.buffers[0];
+
+  vkQueueSubmit(device.transferQueue, 1, &submitInfo, VK_NULL_HANDLE);
+  vkQueueWaitIdle(device.transferQueue);
+}

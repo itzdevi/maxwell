@@ -6,8 +6,8 @@
 
 void mw_renderer_record_draw_command_buffer(
     mw_swapchain swapchain, mw_pipeline pipeline, mw_command commandBuffer,
-    VkFramebuffer* framebuffers, mw_buffer buffer, unsigned int imageIndex,
-    unsigned int frameIndex) {
+    VkFramebuffer* framebuffers, mw_buffer vertexBuffer, mw_buffer indexBuffer,
+    unsigned int imageIndex, unsigned int frameIndex) {
   VkCommandBufferBeginInfo commandBufferBeginInfo = {0};
   commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -46,12 +46,14 @@ void mw_renderer_record_draw_command_buffer(
   scissor.extent = swapchain.extent;
   vkCmdSetScissor(commandBuffer.buffers[frameIndex], 0, 1, &scissor);
 
-  VkBuffer buffers[] = {buffer.buffer};
+  VkBuffer buffers[] = {vertexBuffer.buffer};
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer.buffers[frameIndex], 0, 1, buffers,
                          offsets);
-  vkCmdDraw(commandBuffer.buffers[frameIndex], buffer.size / buffer.stride, 1,
-            0, 0);
+  vkCmdBindIndexBuffer(commandBuffer.buffers[frameIndex], indexBuffer.buffer, 0,
+                       VK_INDEX_TYPE_UINT16);
+  vkCmdDrawIndexed(commandBuffer.buffers[frameIndex],
+                   indexBuffer.size / indexBuffer.stride, 1, 0, 0, 0);
 
   vkCmdEndRenderPass(commandBuffer.buffers[frameIndex]);
   MW_ASSERT(vkEndCommandBuffer(commandBuffer.buffers[frameIndex]) ==

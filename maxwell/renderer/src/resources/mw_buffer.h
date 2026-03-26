@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "commands/mw_command.h"
 #include "core/mw_device.h"
 #include "mw_renderer_vertex.h"
 
@@ -19,5 +20,7 @@ mw_buffer mw_renderer_create_buffer(mw_device device,
                                     uint32_t stride, VkBufferUsageFlags usage,
                                     VkMemoryPropertyFlags properties);
 void mw_renderer_destroy_buffer(mw_device device, mw_buffer buffer);
+void mw_renderer_copy_buffer(mw_device device, mw_buffer srcBuffer,
+                             mw_buffer dstBuffer, mw_command transferCommand);
 
 #endif

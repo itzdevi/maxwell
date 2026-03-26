@@ -13,11 +13,11 @@ void mw_framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
 }
 
 void mw_app_start(mw_app_info info) {
-  mw_vertex vertices[] = {
-      {{-0.5, 0.5}, {1, 0, 0}},
-      {{0.5, 0.5}, {0, 1, 0}},
-      {{0, -0.5}, {0, 0, 1}},
-  };
+  mw_vertex vertices[] = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                          {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                          {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                          {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+  uint16_t indices[] = {0, 1, 2, 2, 3, 0};
 
   MW_ASSERT(glfwInit());
 
@@ -27,7 +27,8 @@ void mw_app_start(mw_app_info info) {
 
   glfwSetFramebufferSizeCallback(window, mw_framebuffer_resize_callback);
 
-  mw_renderer_initialize(info, vertices, sizeof(vertices));
+  mw_renderer_initialize(info, vertices, sizeof(vertices), indices,
+                         sizeof(indices));
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

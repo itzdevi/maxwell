@@ -11,7 +11,7 @@
 
 void mw_renderer_record_draw_command_buffer(
     mw_swapchain swapchain, mw_pipeline pipeline, mw_command commandBuffer,
-    VkFramebuffer* framebuffers, mw_buffer buffer, unsigned int imageIndex,
-    unsigned int frameIndex);
+    VkFramebuffer* framebuffers, mw_buffer vertexBuffer, mw_buffer indexBuffer,
+    unsigned int imageIndex, unsigned int frameIndex);
 
 #endif
