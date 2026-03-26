@@ -3,11 +3,11 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../core/mw_device.h"
-#include "../renderer/mw_pipeline.h"
-#include "../renderer/mw_swapchain.h"
-#include "../resources/mw_buffer.h"
+#include "core/mw_device.h"
 #include "mw_command.h"
+#include "renderer/mw_pipeline.h"
+#include "renderer/mw_swapchain.h"
+#include "resources/mw_buffer.h"
 
 void mw_renderer_record_command_buffer(
     mw_swapchain swapchain, mw_pipeline pipeline,

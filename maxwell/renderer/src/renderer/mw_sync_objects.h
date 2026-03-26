@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../core/mw_device.h"
+#include "core/mw_device.h"
 
 typedef struct mw_sync_objects {
   VkFence* frameFences;

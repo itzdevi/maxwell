@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../core/mw_device.h"
+#include "core/mw_device.h"
 #include "mw_pipeline.h"
 #include "mw_swapchain.h"
 

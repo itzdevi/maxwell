@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../core/mw_queue.h"
+#include "core/mw_queue.h"
 #include "mw_application.h"
 #include "mw_assert.h"
 #include "mw_framebuffer.h"
