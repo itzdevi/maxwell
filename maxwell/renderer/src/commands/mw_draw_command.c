@@ -1,8 +1,8 @@
-#include "mw_command_buffer.h"
+#include "mw_draw_command.h"
 
+#include "../core/mw_queue.h"
+#include "../resources/mw_buffer.h"
 #include "mw_assert.h"
-#include "mw_buffer.h"
-#include "mw_render_queue.h"
 
 VkCommandPool mw_create_command_pool(VkDevice device,
                                      VkPhysicalDevice physicalDevice,

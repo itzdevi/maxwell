@@ -4,7 +4,7 @@
 
 #include "mw_assert.h"
 #include "mw_physical_device.h"
-#include "mw_render_queue.h"
+#include "mw_queue.h"
 
 const char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
@@ -81,6 +81,8 @@ mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
                    &device.presentQueue);
   vkGetDeviceQueue(device.device, indices.graphicsFamily, 0,
                    &device.graphicsQueue);
+  vkGetDeviceQueue(device.device, indices.transferFamily, 0,
+                   &device.transferQueue);
   return device;
 }
 

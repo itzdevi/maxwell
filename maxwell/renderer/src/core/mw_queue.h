@@ -6,6 +6,7 @@
 typedef struct mw_queue_family_indices {
   int graphicsFamily;
   int presentFamily;
+  int transferFamily;
 } mw_queue_family_indices;
 
 mw_queue_family_indices mw_renderer_create_empty_queue_families();

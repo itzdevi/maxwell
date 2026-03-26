@@ -7,6 +7,7 @@ typedef struct mw_device {
   VkDevice device;
   VkQueue presentQueue;
   VkQueue graphicsQueue;
+  VkQueue transferQueue;
 } mw_device;
 
 int mw_renderer_check_device_extension_support(VkPhysicalDevice device);

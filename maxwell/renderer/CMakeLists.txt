@@ -1,17 +1,18 @@
 add_library(renderer STATIC
     src/mw_renderer.c
-    src/mw_instance.c
-    src/mw_surface.c
-    src/mw_physical_device.c
-    src/mw_swapchain.c
-    src/mw_device.c
-    src/mw_render_queue.c
-    src/mw_pipeline.c
-    src/mw_framebuffer.c
-    src/mw_command_buffer.c
-    src/mw_sync_objects.c
-    src/mw_vertex.c
-    src/mw_buffer.c
+    src/core/mw_instance.c
+    src/core/mw_surface.c
+    src/core/mw_physical_device.c
+    src/core/mw_device.c
+    src/core/mw_queue.c
+    src/renderer/mw_swapchain.c
+    src/renderer/mw_pipeline.c
+    src/renderer/mw_framebuffer.c
+    src/renderer/mw_sync_objects.c
+    src/renderer/mw_vertex.c
+    src/commands/mw_draw_command.c
+    src/commands/mw_transfer_command.c
+    src/resources/mw_buffer.c
 )
 
 find_package(Vulkan REQUIRED)

@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "mw_device.h"
+#include "../core/mw_device.h"
 #include "mw_renderer_vertex.h"
 
 typedef struct mw_buffer {

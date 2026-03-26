@@ -1,17 +1,13 @@
-#ifndef MW_COMMAND_BUFFER_H
-#define MW_COMMAND_BUFFER_H
+#ifndef MW_DRAW_BUFFER_H
+#define MW_DRAW_BUFFER_H
 
 #include <vulkan/vulkan.h>
 
-#include "mw_buffer.h"
-#include "mw_device.h"
-#include "mw_pipeline.h"
-#include "mw_swapchain.h"
-
-typedef struct mw_command_buffers {
-  VkCommandBuffer* buffers;
-  VkCommandPool pool;
-} mw_command_buffers;
+#include "../core/mw_device.h"
+#include "../renderer/mw_pipeline.h"
+#include "../renderer/mw_swapchain.h"
+#include "../resources/mw_buffer.h"
+#include "mw_command.h"
 
 void mw_renderer_record_command_buffer(
     mw_swapchain swapchain, mw_pipeline pipeline,

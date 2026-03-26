@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../core/mw_queue.h"
 #include "mw_application.h"
 #include "mw_assert.h"
 #include "mw_framebuffer.h"
 #include "mw_math.h"
-#include "mw_render_queue.h"
 
 VkSurfaceFormatKHR mw_choose_swap_surface_format(
     VkSurfaceFormatKHR* availableFormats, unsigned int availableFormatsCount) {

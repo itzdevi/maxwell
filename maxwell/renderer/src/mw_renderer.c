@@ -2,17 +2,17 @@
 
 #include <vulkan/vulkan.h>
 
+#include "commands/mw_draw_command.h"
+#include "core/mw_device.h"
+#include "core/mw_instance.h"
+#include "core/mw_physical_device.h"
+#include "core/mw_surface.h"
 #include "mw_assert.h"
-#include "mw_buffer.h"
-#include "mw_command_buffer.h"
-#include "mw_device.h"
-#include "mw_framebuffer.h"
-#include "mw_instance.h"
-#include "mw_physical_device.h"
-#include "mw_pipeline.h"
-#include "mw_surface.h"
-#include "mw_swapchain.h"
-#include "mw_sync_objects.h"
+#include "renderer/mw_framebuffer.h"
+#include "renderer/mw_pipeline.h"
+#include "renderer/mw_swapchain.h"
+#include "renderer/mw_sync_objects.h"
+#include "resources/mw_buffer.h"
 
 const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -23,7 +23,8 @@ mw_device device;
 mw_swapchain swapchain;
 mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
-mw_command_buffers commandBuffers;
+mw_command_buffers drawBuffers;
+mw_command_buffers transferBuffers;
 mw_sync_objects syncObjects;
 mw_buffer vertexBuffer;
 int framebufferResized = 0;
@@ -32,7 +33,7 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
                            VkFramebuffer** framebuffers,
                            VkPhysicalDevice physicalDevice,
                            VkSurfaceKHR surface, mw_pipeline* pipeline,
-                           mw_command_buffers* commandBuffers) {
+                           mw_command_buffers* drawBuffers) {
   mw_vec2 size = mw_app_get_framebuffer_size();
   while (size.x == 0 || size.y == 0) {
     size = mw_app_get_framebuffer_size();
@@ -41,7 +42,7 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
 
   vkDeviceWaitIdle(device.device);
 
-  mw_renderer_destroy_command_buffers(device, *commandBuffers);
+  mw_renderer_destroy_command_buffers(device, *drawBuffers);
   mw_renderer_destroy_sync_objects(device, syncObjects);
   mw_renderer_destroy_framebuffers(device, *swapchain, *framebuffers);
   mw_renderer_destroy_pipeline(device, *pipeline);
@@ -51,7 +52,7 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
   *pipeline = mw_renderer_create_pipeline(device, *swapchain);
   *framebuffers =
       mw_renderer_create_framebuffers(device, *swapchain, *pipeline);
-  *commandBuffers = mw_renderer_create_command_buffers(
+  *drawBuffers = mw_renderer_create_command_buffers(
       device, physicalDevice, surface, MAX_FRAMES_IN_FLIGHT);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT,
                                                 swapchain->imageCount);
@@ -69,7 +70,7 @@ void mw_renderer_initialize(mw_app_info info, mw_vertex* vertices,
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
   vertexBuffer = mw_renderer_create_buffer(device, physicalDevice, verticesSize,
                                            sizeof(mw_vertex));
-  commandBuffers = mw_renderer_create_command_buffers(
+  drawBuffers = mw_renderer_create_command_buffers(
       device, physicalDevice, surface, MAX_FRAMES_IN_FLIGHT);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT,
                                                 swapchain.imageCount);
@@ -81,7 +82,7 @@ void mw_renderer_cleanup() {
   vkDeviceWaitIdle(device.device);
 
   mw_renderer_destroy_sync_objects(device, syncObjects);
-  mw_renderer_destroy_command_buffers(device, commandBuffers);
+  mw_renderer_destroy_command_buffers(device, drawBuffers);
   mw_renderer_destroy_buffer(device, vertexBuffer);
   mw_renderer_destroy_framebuffers(device, swapchain, framebuffers);
   mw_renderer_destroy_pipeline(device, pipeline);
@@ -104,7 +105,7 @@ void mw_renderer_draw_frame() {
                             acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
     mw_recreate_swapchain(device, &swapchain, &framebuffers, physicalDevice,
-                          surface, &pipeline, &commandBuffers);
+                          surface, &pipeline, &drawBuffers);
     return;
   } else
     MW_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
@@ -113,15 +114,15 @@ void mw_renderer_draw_frame() {
 
   VkSemaphore submitSemaphore = syncObjects.submitSemaphores[imageIndex];
 
-  vkResetCommandBuffer(commandBuffers.buffers[currentFrame], 0);
-  mw_renderer_record_command_buffer(swapchain, pipeline, commandBuffers,
+  vkResetCommandBuffer(drawBuffers.buffers[currentFrame], 0);
+  mw_renderer_record_command_buffer(swapchain, pipeline, drawBuffers,
                                     framebuffers, vertexBuffer, imageIndex,
                                     currentFrame);
 
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &commandBuffers.buffers[currentFrame];
+  submitInfo.pCommandBuffers = &drawBuffers.buffers[currentFrame];
   submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = &acquireSemaphore;
   submitInfo.signalSemaphoreCount = 1;
@@ -147,7 +148,7 @@ void mw_renderer_draw_frame() {
       framebufferResized) {
     framebufferResized = 0;
     mw_recreate_swapchain(device, &swapchain, &framebuffers, physicalDevice,
-                          surface, &pipeline, &commandBuffers);
+                          surface, &pipeline, &drawBuffers);
   } else
     MW_ASSERT(result == VK_SUCCESS);
 

@@ -1,9 +1,9 @@
 #include "mw_physical_device.h"
 
+#include "../renderer/mw_swapchain.h"
 #include "mw_assert.h"
 #include "mw_device.h"
-#include "mw_render_queue.h"
-#include "mw_swapchain.h"
+#include "mw_queue.h"
 
 int is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface) {
   struct mw_queue_family_indices indices =
