@@ -10,8 +10,8 @@ typedef struct mw_buffer {
   VkBuffer buffer;
   VkDeviceMemory memory;
   void* data;
-  uint32_t size;
-  uint32_t stride;
+  size_t size;
+  size_t stride;
 } mw_buffer;
 
 mw_buffer mw_renderer_create_buffer(mw_device device,

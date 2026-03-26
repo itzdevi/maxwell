@@ -7,9 +7,9 @@
 
 typedef struct mw_swapchain_support_details {
   VkSurfaceCapabilitiesKHR capabilities;
-  unsigned int formatsCount;
+  uint32_t formatsCount;
   VkSurfaceFormatKHR* formats;
-  unsigned int presentModesCount;
+  uint32_t presentModesCount;
   VkPresentModeKHR* presentModes;
 } mw_swapchain_support_details;
 

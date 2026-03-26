@@ -13,9 +13,9 @@ void mw_framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
 }
 
 void mw_app_start(mw_app_info info) {
-  mw_vertex vertices[] = {{{-0.5, 0.5}, {1, 1, 1}},
-                          {{0.5, 0.5}, {1, 1, 1}},
-                          {{0, -0.5}, {1, 1, 1}}};
+  mw_vertex vertices[] = {{{-0.5, 0.5}, {1, 0, 0}},
+                          {{0.5, 0.5}, {0, 1, 0}},
+                          {{0, -0.5}, {0, 0, 1}}};
 
   MW_ASSERT(glfwInit());
 
