@@ -32,12 +32,13 @@ VkCommandPool create_command_pool(VkDevice device,
 mw_command mw_renderer_create_command(mw_device device,
                                       VkPhysicalDevice physicalDevice,
                                       VkSurfaceKHR surface,
-                                      const unsigned int bufferCount,
+                                      const uint16_t bufferCount,
                                       mw_queue_family_type family) {
   mw_command buffers;
   buffers.buffers = malloc(bufferCount * sizeof(VkCommandBuffer));
   buffers.pool =
       create_command_pool(device.device, physicalDevice, surface, family);
+  buffers.count = bufferCount;
 
   VkCommandBufferAllocateInfo commandBufferAllocInfo = {0};
   commandBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

@@ -13,7 +13,7 @@
 #include "renderer/mw_pipeline.h"
 #include "renderer/mw_swapchain.h"
 #include "renderer/mw_sync_objects.h"
-#include "resources/mw_buffer.h"
+#include "resources/mw_vertex_buffer.h"
 
 const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -24,8 +24,8 @@ mw_device device;
 mw_swapchain swapchain;
 mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
-mw_command drawBuffers;
-mw_command transferBuffers;
+mw_command drawCommand;
+mw_command transferCommand;
 mw_sync_objects syncObjects;
 mw_buffer vertexBuffer;
 int framebufferResized = 0;
@@ -69,24 +69,25 @@ void mw_renderer_initialize(mw_app_info info, mw_vertex* vertices,
 
   pipeline = mw_renderer_create_pipeline(device, swapchain);
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
-  vertexBuffer = mw_renderer_create_buffer(device, physicalDevice, surface,
-                                           verticesSize, sizeof(mw_vertex));
-  drawBuffers = mw_renderer_create_command(device, physicalDevice, surface,
-                                           MAX_FRAMES_IN_FLIGHT, GRAPHICS);
-  transferBuffers =
+  transferCommand =
       mw_renderer_create_command(device, physicalDevice, surface, 1, TRANSFER);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT,
                                                 swapchain.imageCount);
 
-  mw_renderer_copy_memory(vertexBuffer, vertices);
+  void* data;
+  vertexBuffer = mw_renderer_create_vertex_buffer(
+      device, physicalDevice, surface, vertices,
+      verticesSize / sizeof(mw_vertex), transferCommand, data);
+  drawCommand = mw_renderer_create_command(device, physicalDevice, surface,
+                                           MAX_FRAMES_IN_FLIGHT, GRAPHICS);
 }
 
 void mw_renderer_cleanup() {
   vkDeviceWaitIdle(device.device);
 
   mw_renderer_destroy_sync_objects(device, syncObjects);
-  mw_renderer_destroy_command(device, drawBuffers);
-  mw_renderer_destroy_command(device, transferBuffers);
+  mw_renderer_destroy_command(device, drawCommand);
+  mw_renderer_destroy_command(device, transferCommand);
   mw_renderer_destroy_buffer(device, vertexBuffer);
   mw_renderer_destroy_framebuffers(device, swapchain, framebuffers);
   mw_renderer_destroy_pipeline(device, pipeline);
@@ -109,7 +110,7 @@ void mw_renderer_draw_frame() {
                             acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
     mw_recreate_swapchain(device, &swapchain, &framebuffers, physicalDevice,
-                          surface, &pipeline, &drawBuffers);
+                          surface, &pipeline, &drawCommand);
     return;
   } else
     MW_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
@@ -118,15 +119,15 @@ void mw_renderer_draw_frame() {
 
   VkSemaphore submitSemaphore = syncObjects.submitSemaphores[imageIndex];
 
-  vkResetCommandBuffer(drawBuffers.buffers[currentFrame], 0);
-  mw_renderer_record_draw_command_buffer(swapchain, pipeline, drawBuffers,
+  vkResetCommandBuffer(drawCommand.buffers[currentFrame], 0);
+  mw_renderer_record_draw_command_buffer(swapchain, pipeline, drawCommand,
                                          framebuffers, vertexBuffer, imageIndex,
                                          currentFrame);
 
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &drawBuffers.buffers[currentFrame];
+  submitInfo.pCommandBuffers = &drawCommand.buffers[currentFrame];
   submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = &acquireSemaphore;
   submitInfo.signalSemaphoreCount = 1;
@@ -152,7 +153,7 @@ void mw_renderer_draw_frame() {
       framebufferResized) {
     framebufferResized = 0;
     mw_recreate_swapchain(device, &swapchain, &framebuffers, physicalDevice,
-                          surface, &pipeline, &drawBuffers);
+                          surface, &pipeline, &drawCommand);
   } else
     MW_ASSERT(result == VK_SUCCESS);
 

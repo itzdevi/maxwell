@@ -1,7 +1,5 @@
 #include "mw_buffer.h"
 
-#include <string.h>
-
 #include "core/mw_queue.h"
 #include "mw_assert.h"
 
@@ -24,19 +22,13 @@ uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
 mw_buffer mw_renderer_create_buffer(mw_device device,
                                     VkPhysicalDevice physicalDevice,
                                     VkSurfaceKHR surface, uint32_t size,
-                                    uint32_t stride) {
+                                    uint32_t stride, VkBufferUsageFlags usage,
+                                    VkMemoryPropertyFlags properties) {
   VkBufferCreateInfo bufferInfo = {0};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferInfo.size = size;
-  bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-  bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-
-  mw_queue_family_indices indices =
-      mw_renderer_find_queue_families(physicalDevice, surface);
-  int families[2] = {indices.graphicsFamily, indices.transferFamily};
-
-  bufferInfo.pQueueFamilyIndices = families;
-  bufferInfo.queueFamilyIndexCount = 2;
+  bufferInfo.usage = usage;
+  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
   VkBuffer buffer;
   MW_ASSERT(vkCreateBuffer(device.device, &bufferInfo, NULL, &buffer) ==
@@ -48,10 +40,8 @@ mw_buffer mw_renderer_create_buffer(mw_device device,
   VkMemoryAllocateInfo allocInfo = {0};
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memoryRequirements.size;
-  allocInfo.memoryTypeIndex =
-      find_memory_type(physicalDevice, memoryRequirements.memoryTypeBits,
-                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  allocInfo.memoryTypeIndex = find_memory_type(
+      physicalDevice, memoryRequirements.memoryTypeBits, properties);
 
   VkDeviceMemory memory;
   MW_ASSERT(vkAllocateMemory(device.device, &allocInfo, NULL, &memory) ==
@@ -59,22 +49,11 @@ mw_buffer mw_renderer_create_buffer(mw_device device,
 
   vkBindBufferMemory(device.device, buffer, memory, 0);
 
-  void* data;
-  vkMapMemory(device.device, memory, 0, memoryRequirements.size, 0, &data);
-
-  return (mw_buffer){.buffer = buffer,
-                     .memory = memory,
-                     .data = data,
-                     .size = size,
-                     .stride = stride};
-}
-
-void mw_renderer_copy_memory(mw_buffer buffer, void* data) {
-  memcpy(buffer.data, data, buffer.size);
+  return (mw_buffer){
+      .buffer = buffer, .memory = memory, .size = size, .stride = stride};
 }
 
 void mw_renderer_destroy_buffer(mw_device device, mw_buffer buffer) {
-  vkUnmapMemory(device.device, buffer.memory);
   vkDestroyBuffer(device.device, buffer.buffer, NULL);
   vkFreeMemory(device.device, buffer.memory, NULL);
 }
