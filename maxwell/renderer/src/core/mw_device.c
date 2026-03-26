@@ -47,12 +47,13 @@ mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
 
   float queuePriority = 1.0f;
 
-  uint32_t uniqueQueueFamilies[2];
+  uint32_t uniqueQueueFamilies[3];
   uint32_t queueCount = 0;
 
   uniqueQueueFamilies[queueCount++] = indices.graphicsFamily;
   if (indices.presentFamily != indices.graphicsFamily)
     uniqueQueueFamilies[queueCount++] = indices.presentFamily;
+  uniqueQueueFamilies[queueCount++] = indices.transferFamily;
 
   VkDeviceQueueCreateInfo queueCreateInfos[2] = {0};
   for (uint32_t i = 0; i < queueCount; i++) {

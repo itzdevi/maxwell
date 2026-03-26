@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "core/mw_queue.h"
 #include "mw_assert.h"
 
 uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
@@ -22,12 +23,20 @@ uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
 
 mw_buffer mw_renderer_create_buffer(mw_device device,
                                     VkPhysicalDevice physicalDevice,
-                                    uint32_t size, uint32_t stride) {
+                                    VkSurfaceKHR surface, uint32_t size,
+                                    uint32_t stride) {
   VkBufferCreateInfo bufferInfo = {0};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferInfo.size = size;
   bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+
+  mw_queue_family_indices indices =
+      mw_renderer_find_queue_families(physicalDevice, surface);
+  int families[2] = {indices.graphicsFamily, indices.transferFamily};
+
+  bufferInfo.pQueueFamilyIndices = families;
+  bufferInfo.queueFamilyIndexCount = 2;
 
   VkBuffer buffer;
   MW_ASSERT(vkCreateBuffer(device.device, &bufferInfo, NULL, &buffer) ==

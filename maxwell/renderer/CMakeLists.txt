@@ -10,6 +10,7 @@ add_library(renderer STATIC
     src/renderer/mw_framebuffer.c
     src/renderer/mw_sync_objects.c
     src/renderer/mw_vertex.c
+    src/commands/mw_command.c
     src/commands/mw_draw_command.c
     src/commands/mw_transfer_command.c
     src/resources/mw_buffer.c

@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "commands/mw_draw_command.h"
+#include "commands/mw_transfer_command.h"
 #include "core/mw_device.h"
 #include "core/mw_instance.h"
 #include "core/mw_physical_device.h"
@@ -23,8 +24,8 @@ mw_device device;
 mw_swapchain swapchain;
 mw_pipeline pipeline;
 VkFramebuffer* framebuffers;
-mw_command_buffers drawBuffers;
-mw_command_buffers transferBuffers;
+mw_command drawBuffers;
+mw_command transferBuffers;
 mw_sync_objects syncObjects;
 mw_buffer vertexBuffer;
 int framebufferResized = 0;
@@ -33,7 +34,7 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
                            VkFramebuffer** framebuffers,
                            VkPhysicalDevice physicalDevice,
                            VkSurfaceKHR surface, mw_pipeline* pipeline,
-                           mw_command_buffers* drawBuffers) {
+                           mw_command* drawBuffers) {
   mw_vec2 size = mw_app_get_framebuffer_size();
   while (size.x == 0 || size.y == 0) {
     size = mw_app_get_framebuffer_size();
@@ -42,7 +43,7 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
 
   vkDeviceWaitIdle(device.device);
 
-  mw_renderer_destroy_command_buffers(device, *drawBuffers);
+  mw_renderer_destroy_command(device, *drawBuffers);
   mw_renderer_destroy_sync_objects(device, syncObjects);
   mw_renderer_destroy_framebuffers(device, *swapchain, *framebuffers);
   mw_renderer_destroy_pipeline(device, *pipeline);
@@ -52,8 +53,8 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
   *pipeline = mw_renderer_create_pipeline(device, *swapchain);
   *framebuffers =
       mw_renderer_create_framebuffers(device, *swapchain, *pipeline);
-  *drawBuffers = mw_renderer_create_command_buffers(
-      device, physicalDevice, surface, MAX_FRAMES_IN_FLIGHT);
+  *drawBuffers = mw_renderer_create_command(device, physicalDevice, surface,
+                                            MAX_FRAMES_IN_FLIGHT, GRAPHICS);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT,
                                                 swapchain->imageCount);
 }
@@ -68,10 +69,12 @@ void mw_renderer_initialize(mw_app_info info, mw_vertex* vertices,
 
   pipeline = mw_renderer_create_pipeline(device, swapchain);
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
-  vertexBuffer = mw_renderer_create_buffer(device, physicalDevice, verticesSize,
-                                           sizeof(mw_vertex));
-  drawBuffers = mw_renderer_create_command_buffers(
-      device, physicalDevice, surface, MAX_FRAMES_IN_FLIGHT);
+  vertexBuffer = mw_renderer_create_buffer(device, physicalDevice, surface,
+                                           verticesSize, sizeof(mw_vertex));
+  drawBuffers = mw_renderer_create_command(device, physicalDevice, surface,
+                                           MAX_FRAMES_IN_FLIGHT, GRAPHICS);
+  transferBuffers =
+      mw_renderer_create_command(device, physicalDevice, surface, 1, TRANSFER);
   syncObjects = mw_renderer_create_sync_objects(device, MAX_FRAMES_IN_FLIGHT,
                                                 swapchain.imageCount);
 
@@ -82,7 +85,8 @@ void mw_renderer_cleanup() {
   vkDeviceWaitIdle(device.device);
 
   mw_renderer_destroy_sync_objects(device, syncObjects);
-  mw_renderer_destroy_command_buffers(device, drawBuffers);
+  mw_renderer_destroy_command(device, drawBuffers);
+  mw_renderer_destroy_command(device, transferBuffers);
   mw_renderer_destroy_buffer(device, vertexBuffer);
   mw_renderer_destroy_framebuffers(device, swapchain, framebuffers);
   mw_renderer_destroy_pipeline(device, pipeline);
@@ -115,9 +119,9 @@ void mw_renderer_draw_frame() {
   VkSemaphore submitSemaphore = syncObjects.submitSemaphores[imageIndex];
 
   vkResetCommandBuffer(drawBuffers.buffers[currentFrame], 0);
-  mw_renderer_record_command_buffer(swapchain, pipeline, drawBuffers,
-                                    framebuffers, vertexBuffer, imageIndex,
-                                    currentFrame);
+  mw_renderer_record_draw_command_buffer(swapchain, pipeline, drawBuffers,
+                                         framebuffers, vertexBuffer, imageIndex,
+                                         currentFrame);
 
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

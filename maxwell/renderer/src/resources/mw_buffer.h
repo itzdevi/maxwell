@@ -16,7 +16,8 @@ typedef struct mw_buffer {
 
 mw_buffer mw_renderer_create_buffer(mw_device device,
                                     VkPhysicalDevice physicalDevice,
-                                    uint32_t size, uint32_t stride);
+                                    VkSurfaceKHR surface, uint32_t size,
+                                    uint32_t stride);
 void mw_renderer_copy_memory(mw_buffer buffer, void* data);
 void mw_renderer_destroy_buffer(mw_device device, mw_buffer buffer);
 
