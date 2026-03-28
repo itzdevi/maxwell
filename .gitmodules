@@ -1,6 +1,0 @@
-[submodule "maxwell/glfw"]
-	path = maxwell/glfw
-	url = https://github.com/glfw/glfw.git
-[submodule "maxwell/cglm"]
-	path = maxwell/cglm
-	url = https://github.com/recp/cglm.git
