@@ -31,19 +31,13 @@ mw_sync_objects syncObjects;
 mw_buffer vertexBuffer;
 mw_buffer indexBuffer;
 int framebufferResized = 0;
+vec2 framebufferSize;
 
 void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
                            VkFramebuffer** framebuffers,
                            VkPhysicalDevice physicalDevice,
                            VkSurfaceKHR surface, mw_pipeline* pipeline,
                            mw_command* drawBuffers) {
-  vec2 size;
-  mw_app_get_framebuffer_size(size);
-  while (size[0] == 0 || size[1] == 0) {
-    mw_app_get_framebuffer_size(size);
-    mw_app_wait_events();
-  }
-
   vkDeviceWaitIdle(device.device);
 
   mw_renderer_destroy_command(device, *drawBuffers);
@@ -52,7 +46,8 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
   mw_renderer_destroy_pipeline(device, *pipeline);
   mw_renderer_destroy_swapchain(device, *swapchain);
 
-  *swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
+  *swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device,
+                                            framebufferSize);
   *pipeline = mw_renderer_create_pipeline(device, *swapchain);
   *framebuffers =
       mw_renderer_create_framebuffers(device, *swapchain, *pipeline);
@@ -62,14 +57,16 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
                                                 swapchain->imageCount);
 }
 
-void mw_renderer_initialize(mw_app_info info, mw_vertex* vertices,
+void mw_renderer_initialize(mw_renderer_config config, mw_vertex* vertices,
                             uint32_t verticesSize, uint16_t* indices,
                             uint32_t indicesSize) {
-  instance = mw_renderer_create_instance(info.title);
-  surface = mw_renderer_create_surface(instance);
+  glm_vec2_copy(config.framebufferSize, framebufferSize);
+  instance = mw_renderer_create_instance(config);
+  surface = mw_renderer_create_surface(config, instance);
   physicalDevice = mw_renderer_pick_physical_device(instance, surface);
   device = mw_renderer_create_device(physicalDevice, surface);
-  swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device);
+  swapchain = mw_renderer_create_swapchain(physicalDevice, surface, device,
+                                           framebufferSize);
 
   pipeline = mw_renderer_create_pipeline(device, swapchain);
   framebuffers = mw_renderer_create_framebuffers(device, swapchain, pipeline);
@@ -173,4 +170,4 @@ void mw_renderer_draw_frame() {
 
 void mw_renderer_wait_for_idle() { vkDeviceWaitIdle(device.device); }
 
-void mw_renderer_update_framebuffer_resized() { framebufferResized = 1; }
+void mw_renderer_set_framebuffer_size(vec2 size) { framebufferResized = 1; }

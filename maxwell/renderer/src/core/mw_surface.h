@@ -3,7 +3,10 @@
 
 #include <vulkan/vulkan.h>
 
-VkSurfaceKHR mw_renderer_create_surface(VkInstance instance);
+#include "mw_renderer.h"
+
+VkSurfaceKHR mw_renderer_create_surface(mw_renderer_config config,
+                                        VkInstance instance);
 void mw_renderer_destroy_surface(VkInstance instance, VkSurfaceKHR surface);
 
 #endif

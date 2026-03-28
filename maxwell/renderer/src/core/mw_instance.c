@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mw_application.h"
 #include "mw_core.h"
 
 const char* validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
@@ -71,7 +70,7 @@ static void populateDebugMessengerCreateInfo(
   createInfo->pUserData = NULL;
 }
 
-VkInstance mw_renderer_create_instance(const char* title) {
+VkInstance mw_renderer_create_instance(mw_renderer_config config) {
   if (enableValidationLayers && !mw_renderer_check_validation_layer_support()) {
     printf(
         "Warning: Validation layers requested, but not available! "
@@ -81,7 +80,7 @@ VkInstance mw_renderer_create_instance(const char* title) {
 
   VkApplicationInfo appInfo = {0};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo.pApplicationName = title;
+  appInfo.pApplicationName = config.title;
   appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
   appInfo.pEngineName = "Maxwell";
   appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -91,21 +90,18 @@ VkInstance mw_renderer_create_instance(const char* title) {
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pApplicationInfo = &appInfo;
 
-  unsigned int glfwExtensionCount = 0;
-  const char** glfwExtensions = mw_app_get_extensions(&glfwExtensionCount);
-
-  unsigned int extensionCount = glfwExtensionCount;
+  unsigned int extensionCount = config.extensionCount;
   if (enableValidationLayers) {
     extensionCount += 1;
   }
 
   const char** extensions = malloc(extensionCount * sizeof(const char*));
-  for (int i = 0; i < glfwExtensionCount; ++i) {
-    extensions[i] = glfwExtensions[i];
+  for (int i = 0; i < extensionCount; ++i) {
+    extensions[i] = config.extensions[i];
   }
 
   if (enableValidationLayers) {
-    extensions[glfwExtensionCount] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+    extensions[extensionCount] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
   }
 
   createInfo.enabledExtensionCount = extensionCount;

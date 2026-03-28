@@ -2,12 +2,12 @@
 
 #include <stdio.h>
 
-#include "mw_application.h"
 #include "mw_core.h"
 
-VkSurfaceKHR mw_renderer_create_surface(VkInstance instance) {
+VkSurfaceKHR mw_renderer_create_surface(mw_renderer_config config,
+                                        VkInstance instance) {
   VkSurfaceKHR surface;
-  MW_ASSERT(mw_app_create_surface(instance, &surface) == VK_SUCCESS);
+  MW_ASSERT(config.surfaceCreator(instance, &surface) == VK_SUCCESS);
   return surface;
 }
 

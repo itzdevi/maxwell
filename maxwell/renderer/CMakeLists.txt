@@ -24,7 +24,6 @@ target_link_libraries(renderer PUBLIC
     Vulkan::Vulkan
     core
     cglm
-    application
 )
 
 target_include_directories(renderer

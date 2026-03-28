@@ -8,8 +8,24 @@
 
 GLFWwindow* window;
 
+void mw_app_get_framebuffer_size(vec2 dest) {
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  dest[0] = width;
+  dest[1] = height;
+}
+
 void mw_framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
-  mw_renderer_update_framebuffer_resized();
+  vec2 fbSize = {width, height};
+  mw_renderer_set_framebuffer_size(fbSize);
+}
+
+const char** mw_get_extensions(int* extensionCount) {
+  return glfwGetRequiredInstanceExtensions(extensionCount);
+}
+
+VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface) {
+  return glfwCreateWindowSurface(instance, window, NULL, surface);
 }
 
 void mw_app_start(mw_app_info info) {
@@ -27,11 +43,23 @@ void mw_app_start(mw_app_info info) {
 
   glfwSetFramebufferSizeCallback(window, mw_framebuffer_resize_callback);
 
-  mw_renderer_initialize(info, vertices, sizeof(vertices), indices,
+  int extensionsCount = 0;
+  const char** extensions = mw_get_extensions(&extensionsCount);
+  mw_renderer_config rendererConfig = {
+      .title = info.title,
+      .extensionCount = extensionsCount,
+      .extensions = extensions,
+      .surfaceCreator = &mw_app_create_surface};
+  glm_vec2_copy(info.size, rendererConfig.framebufferSize);
+  mw_renderer_initialize(rendererConfig, vertices, sizeof(vertices), indices,
                          sizeof(indices));
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
+
+    vec2 fbSize;
+    mw_app_get_framebuffer_size(fbSize);
+    if (fbSize[0] == 0 || fbSize[1] == 0) glfwWaitEvents();
 
     mw_renderer_draw_frame();
   }
@@ -40,20 +68,3 @@ void mw_app_start(mw_app_info info) {
   glfwDestroyWindow(window);
   glfwTerminate();
 }
-
-const char** mw_app_get_extensions(int* extensionCount) {
-  return glfwGetRequiredInstanceExtensions(extensionCount);
-}
-
-VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface) {
-  return glfwCreateWindowSurface(instance, window, NULL, surface);
-}
-
-void mw_app_get_framebuffer_size(vec2 dest) {
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  dest[0] = width;
-  dest[1] = height;
-}
-
-void mw_app_wait_events() { glfwWaitEvents(); }

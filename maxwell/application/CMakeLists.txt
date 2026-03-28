@@ -1,10 +1,7 @@
-find_package(Vulkan REQUIRED)
-
 add_library(application STATIC
     src/mw_application.c
 )
 target_link_libraries(application PRIVATE
-    Vulkan::Vulkan
     glfw
     cglm
     core

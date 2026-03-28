@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "core/mw_queue.h"
-#include "mw_application.h"
 #include "mw_core.h"
 #include "mw_framebuffer.h"
 
@@ -20,14 +19,13 @@ VkSurfaceFormatKHR mw_choose_swap_surface_format(
   return availableFormats[0];
 }
 
-VkExtent2D mw_choose_swap_extent(VkSurfaceCapabilitiesKHR capabilities) {
+VkExtent2D mw_choose_swap_extent(VkSurfaceCapabilitiesKHR capabilities,
+                                 vec2 framebufferSize) {
   if (capabilities.currentExtent.width != UINT32_MAX)
     return capabilities.currentExtent;
   else {
-    vec2 size;
-    mw_app_get_framebuffer_size(size);
-
-    VkExtent2D actualExtent = {(unsigned int)size[0], (unsigned int)size[1]};
+    VkExtent2D actualExtent = {(unsigned int)framebufferSize[0],
+                               (unsigned int)framebufferSize[1]};
     actualExtent.width =
         glm_clamp(actualExtent.width, capabilities.minImageExtent.width,
                   capabilities.maxImageExtent.width);
@@ -116,7 +114,8 @@ VkImageView* mw_create_image_views(VkDevice device, VkFormat imageFormat,
 
 mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
                                           VkSurfaceKHR surface,
-                                          mw_device device) {
+                                          mw_device device,
+                                          vec2 framebufferSize) {
   mw_swapchain_support_details details =
       mw_renderer_create_swapchain_support_details(physicalDevice, surface);
 
@@ -124,7 +123,8 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
       mw_choose_swap_surface_format(details.formats, details.formatsCount);
   VkPresentModeKHR presentMode = mw_choose_swap_present_mode(
       details.presentModes, details.presentModesCount);
-  VkExtent2D extent = mw_choose_swap_extent(details.capabilities);
+  VkExtent2D extent =
+      mw_choose_swap_extent(details.capabilities, framebufferSize);
 
   unsigned int imageCount = details.capabilities.minImageCount + 1;
   if (details.capabilities.maxImageCount > 0 &&

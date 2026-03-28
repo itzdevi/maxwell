@@ -3,7 +3,9 @@
 
 #include <vulkan/vulkan.h>
 
-VkInstance mw_renderer_create_instance(const char* title);
+#include "mw_renderer.h"
+
+VkInstance mw_renderer_create_instance(mw_renderer_config);
 void mw_renderer_destroy_instance(VkInstance instance);
 
 #endif

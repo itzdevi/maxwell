@@ -1,6 +1,7 @@
 #ifndef MW_SWAPCHAIN_H
 #define MW_SWAPCHAIN_H
 
+#include <cglm/cglm.h>
 #include <vulkan/vulkan.h>
 
 #include "core/mw_device.h"
@@ -29,7 +30,8 @@ void mw_renderer_free_swapchain_support_details(
 
 mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
                                           VkSurfaceKHR surface,
-                                          mw_device device);
+                                          mw_device device,
+                                          vec2 framebufferSize);
 void mw_renderer_destroy_swapchain(mw_device device, mw_swapchain swapchain);
 
 #endif
