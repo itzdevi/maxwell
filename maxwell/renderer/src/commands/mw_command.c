@@ -21,6 +21,9 @@ VkCommandPool create_command_pool(VkDevice device,
     case TRANSFER:
       commandPoolCreateInfo.queueFamilyIndex = indices.transferFamily;
       break;
+    default:
+      MW_ASSERT(0);  // UNDEFINED BEHAVIOR
+      break;
   }
 
   VkCommandPool pool;
