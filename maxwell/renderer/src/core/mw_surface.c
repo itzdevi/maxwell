@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "mw_application.h"
-#include "mw_assert.h"
+#include "mw_core.h"
 
 VkSurfaceKHR mw_renderer_create_surface(VkInstance instance) {
   VkSurfaceKHR surface;

@@ -1,7 +1,6 @@
 #include "mw_pipeline.h"
 
-#include "mw_assert.h"
-#include "mw_file.h"
+#include "mw_core.h"
 #include "mw_renderer_vertex.h"
 
 VkShaderModule mw_create_shader_module(VkDevice device, const char* code,

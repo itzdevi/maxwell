@@ -1,7 +1,8 @@
 #ifndef MW_MAXWELL_H
 #define MW_MAXWELL_H
 
+#include <cglm/cglm.h>
+
 #include "mw_application.h"
-#include "mw_math.h"
 
 #endif

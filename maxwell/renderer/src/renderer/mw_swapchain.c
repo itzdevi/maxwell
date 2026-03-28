@@ -1,14 +1,14 @@
 #include "mw_swapchain.h"
 
+#include <cglm/cglm.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "core/mw_queue.h"
 #include "mw_application.h"
-#include "mw_assert.h"
+#include "mw_core.h"
 #include "mw_framebuffer.h"
-#include "mw_math.h"
 
 VkSurfaceFormatKHR mw_choose_swap_surface_format(
     VkSurfaceFormatKHR* availableFormats, unsigned int availableFormatsCount) {
@@ -24,15 +24,16 @@ VkExtent2D mw_choose_swap_extent(VkSurfaceCapabilitiesKHR capabilities) {
   if (capabilities.currentExtent.width != UINT32_MAX)
     return capabilities.currentExtent;
   else {
-    mw_vec2 size = mw_app_get_framebuffer_size();
+    vec2 size;
+    mw_app_get_framebuffer_size(size);
 
-    VkExtent2D actualExtent = {(unsigned int)size.x, (unsigned int)size.y};
+    VkExtent2D actualExtent = {(unsigned int)size[0], (unsigned int)size[1]};
     actualExtent.width =
-        mw_clamp(actualExtent.width, capabilities.minImageExtent.width,
-                 capabilities.maxImageExtent.width);
+        glm_clamp(actualExtent.width, capabilities.minImageExtent.width,
+                  capabilities.maxImageExtent.width);
     actualExtent.height =
-        mw_clamp(actualExtent.height, capabilities.minImageExtent.height,
-                 capabilities.maxImageExtent.height);
+        glm_clamp(actualExtent.height, capabilities.minImageExtent.height,
+                  capabilities.maxImageExtent.height);
 
     return actualExtent;
   }

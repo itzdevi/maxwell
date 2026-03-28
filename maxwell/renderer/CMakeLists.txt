@@ -23,7 +23,7 @@ find_package(Vulkan REQUIRED)
 target_link_libraries(renderer PUBLIC
     Vulkan::Vulkan
     core
-    math
+    cglm
     application
 )
 

@@ -8,7 +8,7 @@
 #include "core/mw_instance.h"
 #include "core/mw_physical_device.h"
 #include "core/mw_surface.h"
-#include "mw_assert.h"
+#include "mw_core.h"
 #include "renderer/mw_framebuffer.h"
 #include "renderer/mw_pipeline.h"
 #include "renderer/mw_swapchain.h"
@@ -37,9 +37,10 @@ void mw_recreate_swapchain(mw_device device, mw_swapchain* swapchain,
                            VkPhysicalDevice physicalDevice,
                            VkSurfaceKHR surface, mw_pipeline* pipeline,
                            mw_command* drawBuffers) {
-  mw_vec2 size = mw_app_get_framebuffer_size();
-  while (size.x == 0 || size.y == 0) {
-    size = mw_app_get_framebuffer_size();
+  vec2 size;
+  mw_app_get_framebuffer_size(size);
+  while (size[0] == 0 || size[1] == 0) {
+    mw_app_get_framebuffer_size(size);
     mw_app_wait_events();
   }
 

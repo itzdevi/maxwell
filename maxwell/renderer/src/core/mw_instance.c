@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "mw_application.h"
-#include "mw_assert.h"
+#include "mw_core.h"
 
 const char* validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
 

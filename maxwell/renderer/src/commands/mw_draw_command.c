@@ -1,7 +1,7 @@
 #include "mw_draw_command.h"
 
 #include "core/mw_queue.h"
-#include "mw_assert.h"
+#include "mw_core.h"
 #include "resources/mw_buffer.h"
 
 void mw_renderer_record_draw_command_buffer(

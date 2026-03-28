@@ -1,7 +1,7 @@
 #include "mw_buffer.h"
 
 #include "core/mw_queue.h"
-#include "mw_assert.h"
+#include "mw_core.h"
 
 uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
                           VkMemoryPropertyFlags properties) {

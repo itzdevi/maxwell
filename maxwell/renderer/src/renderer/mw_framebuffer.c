@@ -1,6 +1,6 @@
 #include "mw_framebuffer.h"
 
-#include "mw_assert.h"
+#include "mw_core.h"
 
 VkFramebuffer* mw_renderer_create_framebuffers(mw_device device,
                                                mw_swapchain swapchain,

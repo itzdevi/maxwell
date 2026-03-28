@@ -1,6 +1,6 @@
 #include "mw_sync_objects.h"
 
-#include "mw_assert.h"
+#include "mw_core.h"
 
 mw_sync_objects mw_renderer_create_sync_objects(
     mw_device device, const unsigned int maxFramesInFlight,

@@ -3,7 +3,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "mw_assert.h"
+#include "mw_core.h"
 #include "mw_renderer.h"
 
 GLFWwindow* window;
@@ -22,7 +22,7 @@ void mw_app_start(mw_app_info info) {
   MW_ASSERT(glfwInit());
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  window = glfwCreateWindow(info.size.x, info.size.y, info.title, NULL, NULL);
+  window = glfwCreateWindow(info.size[0], info.size[1], info.title, NULL, NULL);
   MW_ASSERT(window);
 
   glfwSetFramebufferSizeCallback(window, mw_framebuffer_resize_callback);
@@ -49,10 +49,11 @@ VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface) {
   return glfwCreateWindowSurface(instance, window, NULL, surface);
 }
 
-mw_vec2 mw_app_get_framebuffer_size() {
+void mw_app_get_framebuffer_size(vec2 dest) {
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
-  return (mw_vec2){width, height};
+  dest[0] = width;
+  dest[1] = height;
 }
 
 void mw_app_wait_events() { glfwWaitEvents(); }
