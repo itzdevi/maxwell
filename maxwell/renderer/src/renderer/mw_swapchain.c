@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "core/mw_queue.h"
 #include "mw_core.h"
 #include "mw_framebuffer.h"
 
@@ -46,43 +45,6 @@ VkPresentModeKHR mw_choose_swap_present_mode(
   return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-mw_swapchain_support_details mw_renderer_create_swapchain_support_details(
-    VkPhysicalDevice device, VkSurfaceKHR surface) {
-  mw_swapchain_support_details details;
-
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
-                                            &details.capabilities);
-
-  unsigned int formatCount = 0;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, NULL);
-  details.formatsCount = formatCount;
-
-  if (formatCount) {
-    details.formats = malloc(formatCount * sizeof(VkSurfaceFormatKHR));
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
-                                         details.formats);
-  }
-
-  unsigned int presentModeCount = 0;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
-                                            NULL);
-  details.presentModesCount = presentModeCount;
-
-  if (presentModeCount) {
-    details.presentModes = malloc(presentModeCount * sizeof(VkPresentModeKHR));
-    vkGetPhysicalDeviceSurfacePresentModesKHR(
-        device, surface, &presentModeCount, details.presentModes);
-  }
-
-  return details;
-}
-
-void mw_renderer_free_swapchain_support_details(
-    mw_swapchain_support_details details) {
-  free(details.formats);
-  free(details.presentModes);
-}
-
 VkImageView* mw_create_image_views(VkDevice device, VkFormat imageFormat,
                                    int imageCount, VkImage* images) {
   VkImageView* imageViews = malloc(imageCount * sizeof(VkImageView));
@@ -117,7 +79,7 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
                                           mw_device device,
                                           vec2 framebufferSize) {
   mw_swapchain_support_details details =
-      mw_renderer_create_swapchain_support_details(physicalDevice, surface);
+      mw_gpu_create_swapchain_support_details(physicalDevice, surface);
 
   VkSurfaceFormatKHR surfaceFormat =
       mw_choose_swap_surface_format(details.formats, details.formatsCount);
@@ -144,7 +106,7 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   createInfo.imageExtent = extent;
 
   struct mw_queue_family_indices indices =
-      mw_renderer_find_queue_families(physicalDevice, surface);
+      mw_gpu_find_queue_families(physicalDevice, surface);
   unsigned int queueFamilyIndices[] = {indices.graphicsFamily,
                                        indices.presentFamily};
 
@@ -190,7 +152,7 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   sc.imageViews =
       mw_create_image_views(device.device, imageFormat, imageCount, images);
 
-  mw_renderer_free_swapchain_support_details(details);
+  mw_gpu_free_swapchain_support_details(details);
 
   return sc;
 }

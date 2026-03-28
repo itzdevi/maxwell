@@ -8,7 +8,7 @@
 
 const char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-int mw_renderer_check_device_extension_support(VkPhysicalDevice device) {
+int mw_gpu_check_device_extension_support(VkPhysicalDevice device) {
   unsigned int extensionCount = 0;
   vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
 
@@ -38,12 +38,12 @@ int mw_renderer_check_device_extension_support(VkPhysicalDevice device) {
   return 1;
 }
 
-mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
-                                    VkSurfaceKHR surface) {
+mw_device mw_gpu_create_device(VkPhysicalDevice physicalDevice,
+                               VkSurfaceKHR surface) {
   mw_device device;
 
   struct mw_queue_family_indices indices =
-      mw_renderer_find_queue_families(physicalDevice, surface);
+      mw_gpu_find_queue_families(physicalDevice, surface);
 
   float queuePriority = 1.0f;
 
@@ -55,7 +55,7 @@ mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
     uniqueQueueFamilies[queueCount++] = indices.presentFamily;
   uniqueQueueFamilies[queueCount++] = indices.transferFamily;
 
-  VkDeviceQueueCreateInfo queueCreateInfos[2] = {0};
+  VkDeviceQueueCreateInfo queueCreateInfos[3] = {0};
   for (uint32_t i = 0; i < queueCount; i++) {
     queueCreateInfos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfos[i].queueFamilyIndex = uniqueQueueFamilies[i];
@@ -78,15 +78,23 @@ mw_device mw_renderer_create_device(VkPhysicalDevice physicalDevice,
   MW_ASSERT(vkCreateDevice(physicalDevice, &createInfo, NULL, &device.device) ==
             VK_SUCCESS);
 
+  MW_ASSERT(indices.presentFamily != UINT32_MAX);
+  MW_ASSERT(indices.graphicsFamily != UINT32_MAX);
+  MW_ASSERT(indices.transferFamily != UINT32_MAX);
+
   vkGetDeviceQueue(device.device, indices.presentFamily, 0,
                    &device.presentQueue);
   vkGetDeviceQueue(device.device, indices.graphicsFamily, 0,
                    &device.graphicsQueue);
   vkGetDeviceQueue(device.device, indices.transferFamily, 0,
                    &device.transferQueue);
+
+  device.presentIndex = indices.presentFamily;
+  device.graphicsIndex = indices.graphicsFamily;
+  device.transferIndex = indices.transferFamily;
   return device;
 }
 
-void mw_renderer_destroy_device(mw_device device) {
+void mw_gpu_destroy_device(mw_device device) {
   vkDestroyDevice(device.device, NULL);
 }

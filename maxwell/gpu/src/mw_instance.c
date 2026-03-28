@@ -70,7 +70,7 @@ static void populateDebugMessengerCreateInfo(
   createInfo->pUserData = NULL;
 }
 
-VkInstance mw_renderer_create_instance(mw_renderer_config config) {
+VkInstance mw_gpu_create_instance(mw_gpu_config config) {
   if (enableValidationLayers && !mw_renderer_check_validation_layer_support()) {
     printf(
         "Warning: Validation layers requested, but not available! "
@@ -90,18 +90,18 @@ VkInstance mw_renderer_create_instance(mw_renderer_config config) {
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pApplicationInfo = &appInfo;
 
-  unsigned int extensionCount = config.extensionCount;
+  unsigned int extensionCount = config.extCount;
   if (enableValidationLayers) {
     extensionCount += 1;
   }
 
   const char** extensions = malloc(extensionCount * sizeof(const char*));
   for (int i = 0; i < extensionCount; ++i) {
-    extensions[i] = config.extensions[i];
+    extensions[i] = config.ext[i];
   }
 
   if (enableValidationLayers) {
-    extensions[extensionCount] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+    extensions[config.extCount] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
   }
 
   createInfo.enabledExtensionCount = extensionCount;
@@ -139,7 +139,7 @@ VkInstance mw_renderer_create_instance(mw_renderer_config config) {
   return instance;
 }
 
-void mw_renderer_destroy_instance(VkInstance instance) {
+void mw_gpu_destroy_instance(VkInstance instance) {
   if (enableValidationLayers) {
     PFN_vkDestroyDebugUtilsMessengerEXT func =
         (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(

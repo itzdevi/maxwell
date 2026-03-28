@@ -1,18 +1,18 @@
 #include "mw_queue.h"
 
-mw_queue_family_indices mw_renderer_create_empty_queue_families() {
+mw_queue_family_indices mw_gpu_create_empty_queue_families() {
   mw_queue_family_indices indices = {-1, -1, -1};
   return indices;
 }
 
-int mw_renderer_check_queue_families(struct mw_queue_family_indices indices) {
+int mw_gpu_check_queue_families(struct mw_queue_family_indices indices) {
   return indices.graphicsFamily != -1 && indices.presentFamily != -1 &&
          indices.transferFamily != -1;
 }
 
-mw_queue_family_indices mw_renderer_find_queue_families(VkPhysicalDevice device,
-                                                        VkSurfaceKHR surface) {
-  mw_queue_family_indices indices = mw_renderer_create_empty_queue_families();
+mw_queue_family_indices mw_gpu_find_queue_families(VkPhysicalDevice device,
+                                                   VkSurfaceKHR surface) {
+  mw_queue_family_indices indices = mw_gpu_create_empty_queue_families();
 
   unsigned int queueFamilyCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, NULL);
@@ -33,7 +33,7 @@ mw_queue_family_indices mw_renderer_find_queue_families(VkPhysicalDevice device,
     vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
     if (presentSupport) indices.presentFamily = i;
 
-    if (mw_renderer_check_queue_families(indices)) break;
+    if (mw_gpu_check_queue_families(indices)) break;
   }
 
   return indices;

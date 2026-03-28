@@ -1,10 +1,9 @@
 #ifndef MW_BUFFER_H
 #define MW_BUFFER_H
 
+#include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
-#include "commands/mw_command.h"
-#include "core/mw_device.h"
 #include "mw_renderer_vertex.h"
 
 typedef struct mw_buffer {

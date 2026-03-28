@@ -7,6 +7,7 @@
 #include "mw_renderer.h"
 
 GLFWwindow* window;
+mw_renderer* renderer;
 
 void mw_app_get_framebuffer_size(vec2 dest) {
   int width, height;
@@ -17,7 +18,7 @@ void mw_app_get_framebuffer_size(vec2 dest) {
 
 void mw_framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
   vec2 fbSize = {width, height};
-  mw_renderer_set_framebuffer_size(fbSize);
+  mw_renderer_set_framebuffer_size(renderer, fbSize);
 }
 
 const char** mw_get_extensions(int* extensionCount) {
@@ -51,8 +52,8 @@ void mw_app_start(mw_app_info info) {
       .extensions = extensions,
       .surfaceCreator = &mw_app_create_surface};
   glm_vec2_copy(info.size, rendererConfig.framebufferSize);
-  mw_renderer_initialize(rendererConfig, vertices, sizeof(vertices), indices,
-                         sizeof(indices));
+  renderer = mw_renderer_initialize(rendererConfig, vertices, sizeof(vertices),
+                                    indices, sizeof(indices));
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -61,9 +62,9 @@ void mw_app_start(mw_app_info info) {
     mw_app_get_framebuffer_size(fbSize);
     if (fbSize[0] == 0 || fbSize[1] == 0) glfwWaitEvents();
 
-    mw_renderer_draw_frame();
+    mw_renderer_draw_frame(renderer);
   }
-  mw_renderer_wait_for_idle();
+  mw_renderer_wait_for_idle(renderer);
 
   glfwDestroyWindow(window);
   glfwTerminate();

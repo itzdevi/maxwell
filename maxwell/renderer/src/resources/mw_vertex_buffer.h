@@ -1,11 +1,10 @@
 #ifndef MW_VERTEX_BUFFER_H
 #define MW_VERTEX_BUFFER_H
 
+#include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
-#include "commands/mw_command.h"
-#include "core/mw_device.h"
-#include "mw_buffer.h"
+#include "resources/mw_buffer.h"
 
 mw_buffer mw_renderer_create_vertex_buffer(
     mw_device device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface,

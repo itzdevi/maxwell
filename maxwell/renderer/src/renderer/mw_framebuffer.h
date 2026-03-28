@@ -1,9 +1,9 @@
 #ifndef MW_FRAMEBUFFER_H
 #define MW_FRAMEBUFFER_H
 
+#include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
-#include "core/mw_device.h"
 #include "mw_pipeline.h"
 #include "mw_swapchain.h"
 

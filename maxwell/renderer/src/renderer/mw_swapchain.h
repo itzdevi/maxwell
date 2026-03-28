@@ -2,17 +2,8 @@
 #define MW_SWAPCHAIN_H
 
 #include <cglm/cglm.h>
+#include <mw_gpu.h>
 #include <vulkan/vulkan.h>
-
-#include "core/mw_device.h"
-
-typedef struct mw_swapchain_support_details {
-  VkSurfaceCapabilitiesKHR capabilities;
-  uint32_t formatsCount;
-  VkSurfaceFormatKHR* formats;
-  uint32_t presentModesCount;
-  VkPresentModeKHR* presentModes;
-} mw_swapchain_support_details;
 
 typedef struct mw_swapchain {
   VkSwapchainKHR swapchain;
@@ -22,11 +13,6 @@ typedef struct mw_swapchain {
   VkExtent2D extent;
   VkImageView* imageViews;
 } mw_swapchain;
-
-mw_swapchain_support_details mw_renderer_create_swapchain_support_details(
-    VkPhysicalDevice device, VkSurfaceKHR surface);
-void mw_renderer_free_swapchain_support_details(
-    mw_swapchain_support_details details);
 
 mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
                                           VkSurfaceKHR surface,

@@ -1,14 +1,14 @@
 #include "mw_command.h"
 
-#include "core/mw_queue.h"
 #include "mw_core.h"
+#include "mw_queue.h"
 
 VkCommandPool create_command_pool(VkDevice device,
                                   VkPhysicalDevice physicalDevice,
                                   VkSurfaceKHR surface,
                                   mw_queue_family_type family) {
   mw_queue_family_indices indices =
-      mw_renderer_find_queue_families(physicalDevice, surface);
+      mw_gpu_find_queue_families(physicalDevice, surface);
 
   VkCommandPoolCreateInfo commandPoolCreateInfo = {0};
   commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -32,11 +32,11 @@ VkCommandPool create_command_pool(VkDevice device,
   return pool;
 }
 
-mw_command mw_renderer_create_command(mw_device device,
-                                      VkPhysicalDevice physicalDevice,
-                                      VkSurfaceKHR surface,
-                                      const uint16_t bufferCount,
-                                      mw_queue_family_type family) {
+mw_command mw_gpu_create_command(mw_device device,
+                                 VkPhysicalDevice physicalDevice,
+                                 VkSurfaceKHR surface,
+                                 const uint16_t bufferCount,
+                                 mw_queue_family_type family) {
   mw_command buffers;
   buffers.buffers = malloc(bufferCount * sizeof(VkCommandBuffer));
   buffers.pool =
@@ -55,7 +55,7 @@ mw_command mw_renderer_create_command(mw_device device,
   return buffers;
 }
 
-void mw_renderer_destroy_command(mw_device device, mw_command buffers) {
+void mw_gpu_destroy_command(mw_device device, mw_command buffers) {
   vkDestroyCommandPool(device.device, buffers.pool, NULL);
 
   free(buffers.buffers);

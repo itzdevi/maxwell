@@ -1,9 +1,9 @@
 #ifndef MW_PIPELINE_H
 #define MW_PIPELINE_H
 
+#include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
-#include "core/mw_device.h"
 #include "mw_swapchain.h"
 
 typedef struct mw_pipeline {
