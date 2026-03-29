@@ -4,6 +4,7 @@
 #include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
+#include "mw_renderer.h"
 #include "mw_swapchain.h"
 
 typedef struct mw_pipeline {
@@ -12,8 +13,7 @@ typedef struct mw_pipeline {
   VkRenderPass renderPass;
 } mw_pipeline;
 
-mw_pipeline mw_renderer_create_pipeline(mw_device device,
-                                        mw_swapchain swapchain);
-void mw_renderer_destroy_pipeline(mw_device device, mw_pipeline pipeline);
+void mw_renderer_create_pipeline(mw_renderer* renderer);
+void mw_renderer_destroy_pipeline(mw_renderer* renderer);
 
 #endif

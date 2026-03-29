@@ -8,8 +8,8 @@ mw_buffer mw_renderer_create_index_buffer(
     void* pData) {
   VkDeviceSize bufferSize = indicesCount * sizeof(uint16_t);
   mw_buffer stagingBuffer = mw_renderer_create_buffer(
-      device, physicalDevice, surface, bufferSize, sizeof(uint16_t),
-      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      device, physicalDevice, surface, bufferSize / sizeof(uint16_t),
+      sizeof(uint16_t), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 

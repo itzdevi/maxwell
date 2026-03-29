@@ -2,10 +2,11 @@
 
 #include <cglm/cglm.h>
 #include <limits.h>
+#include <mw_core.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mw_core.h"
+#include "core/mw_renderer_def.h"
 #include "mw_framebuffer.h"
 
 VkSurfaceFormatKHR mw_choose_swap_surface_format(
@@ -74,19 +75,17 @@ VkImageView* mw_create_image_views(VkDevice device, VkFormat imageFormat,
   return imageViews;
 }
 
-mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
-                                          VkSurfaceKHR surface,
-                                          mw_device device,
-                                          vec2 framebufferSize) {
+void mw_renderer_create_swapchain(mw_renderer* renderer) {
   mw_swapchain_support_details details =
-      mw_gpu_create_swapchain_support_details(physicalDevice, surface);
+      mw_gpu_create_swapchain_support_details(renderer->gpu.physicalDevice,
+                                              renderer->surface);
 
   VkSurfaceFormatKHR surfaceFormat =
       mw_choose_swap_surface_format(details.formats, details.formatsCount);
   VkPresentModeKHR presentMode = mw_choose_swap_present_mode(
       details.presentModes, details.presentModesCount);
   VkExtent2D extent =
-      mw_choose_swap_extent(details.capabilities, framebufferSize);
+      mw_choose_swap_extent(details.capabilities, renderer->framebufferSize);
 
   unsigned int imageCount = details.capabilities.minImageCount + 1;
   if (details.capabilities.maxImageCount > 0 &&
@@ -96,7 +95,7 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
 
   VkSwapchainCreateInfoKHR createInfo = {0};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface = surface;
+  createInfo.surface = renderer->surface;
 
   createInfo.minImageCount = imageCount;
   createInfo.imageFormat = surfaceFormat.format;
@@ -105,8 +104,8 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
   createInfo.imageExtent = extent;
 
-  struct mw_queue_family_indices indices =
-      mw_gpu_find_queue_families(physicalDevice, surface);
+  struct mw_queue_family_indices indices = mw_gpu_find_queue_families(
+      renderer->gpu.physicalDevice, renderer->surface);
   unsigned int queueFamilyIndices[] = {indices.graphicsFamily,
                                        indices.presentFamily};
 
@@ -131,15 +130,22 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   createInfo.presentMode = presentMode;
   createInfo.clipped = VK_TRUE;
 
-  createInfo.oldSwapchain = VK_NULL_HANDLE;
+  if (renderer->swapchain.swapchain)
+    createInfo.oldSwapchain = renderer->swapchain.swapchain;
+  else
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
 
   VkSwapchainKHR swapchain;
-  MW_ASSERT(vkCreateSwapchainKHR(device.device, &createInfo, NULL,
+  MW_ASSERT(vkCreateSwapchainKHR(renderer->gpu.device.device, &createInfo, NULL,
                                  &swapchain) == VK_SUCCESS);
 
-  vkGetSwapchainImagesKHR(device.device, swapchain, &imageCount, NULL);
+  if (renderer->swapchain.swapchain) mw_renderer_destroy_swapchain(renderer);
+
+  vkGetSwapchainImagesKHR(renderer->gpu.device.device, swapchain, &imageCount,
+                          NULL);
   VkImage* images = malloc(imageCount * sizeof(VkImage));
-  vkGetSwapchainImagesKHR(device.device, swapchain, &imageCount, images);
+  vkGetSwapchainImagesKHR(renderer->gpu.device.device, swapchain, &imageCount,
+                          images);
 
   VkFormat imageFormat = surfaceFormat.format;
 
@@ -149,20 +155,21 @@ mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
   sc.images = images;
   sc.imageFormat = imageFormat;
   sc.extent = extent;
-  sc.imageViews =
-      mw_create_image_views(device.device, imageFormat, imageCount, images);
+  sc.imageViews = mw_create_image_views(renderer->gpu.device.device,
+                                        imageFormat, imageCount, images);
 
   mw_gpu_free_swapchain_support_details(details);
-
-  return sc;
+  renderer->swapchain = sc;
 }
 
-void mw_renderer_destroy_swapchain(mw_device device, mw_swapchain swapchain) {
-  vkDestroySwapchainKHR(device.device, swapchain.swapchain, NULL);
+void mw_renderer_destroy_swapchain(mw_renderer* renderer) {
+  vkDestroySwapchainKHR(renderer->gpu.device.device,
+                        renderer->swapchain.swapchain, NULL);
 
-  free(swapchain.images);
+  free(renderer->swapchain.images);
 
-  for (size_t i = 0; i < swapchain.imageCount; i++)
-    vkDestroyImageView(device.device, swapchain.imageViews[i], NULL);
-  free(swapchain.imageViews);
+  for (size_t i = 0; i < renderer->swapchain.imageCount; i++)
+    vkDestroyImageView(renderer->gpu.device.device,
+                       renderer->swapchain.imageViews[i], NULL);
+  free(renderer->swapchain.imageViews);
 }

@@ -1,6 +1,6 @@
 #include "mw_buffer.h"
 
-#include "mw_core.h"
+#include <mw_core.h>
 
 uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
                           VkMemoryPropertyFlags properties) {
@@ -20,12 +20,12 @@ uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
 
 mw_buffer mw_renderer_create_buffer(mw_device device,
                                     VkPhysicalDevice physicalDevice,
-                                    VkSurfaceKHR surface, uint32_t size,
+                                    VkSurfaceKHR surface, uint32_t count,
                                     uint32_t stride, VkBufferUsageFlags usage,
                                     VkMemoryPropertyFlags properties) {
   VkBufferCreateInfo bufferInfo = {0};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size = size;
+  bufferInfo.size = count * stride;
   bufferInfo.usage = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -49,7 +49,7 @@ mw_buffer mw_renderer_create_buffer(mw_device device,
   vkBindBufferMemory(device.device, buffer, memory, 0);
 
   return (mw_buffer){
-      .buffer = buffer, .memory = memory, .size = size, .stride = stride};
+      .buffer = buffer, .memory = memory, .size = count, .stride = stride};
 }
 
 void mw_renderer_destroy_buffer(mw_device device, mw_buffer buffer) {

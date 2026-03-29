@@ -1,6 +1,8 @@
 #include "mw_pipeline.h"
 
-#include "mw_core.h"
+#include <mw_core.h>
+
+#include "core/mw_renderer_def.h"
 #include "mw_renderer_vertex.h"
 
 VkShaderModule mw_create_shader_module(VkDevice device, const char* code,
@@ -62,11 +64,10 @@ VkRenderPass mw_create_render_pass(VkDevice device,
   return renderPass;
 }
 
-mw_pipeline mw_renderer_create_pipeline(mw_device device,
-                                        mw_swapchain swapchain) {
+void mw_renderer_create_pipeline(mw_renderer* renderer) {
   mw_pipeline pipeline;
-  pipeline.renderPass =
-      mw_create_render_pass(device.device, swapchain.imageFormat);
+  pipeline.renderPass = mw_create_render_pass(renderer->gpu.device.device,
+                                              renderer->swapchain.imageFormat);
 
   unsigned int vertSize = 0;
   unsigned int fragSize = 0;
@@ -77,10 +78,10 @@ mw_pipeline mw_renderer_create_pipeline(mw_device device,
   MW_ASSERT(vertSize % 4 == 0);
   MW_ASSERT(fragSize % 4 == 0);
 
-  VkShaderModule vertShaderModule =
-      mw_create_shader_module(device.device, vertShaderCode, vertSize);
-  VkShaderModule fragShaderModule =
-      mw_create_shader_module(device.device, fragShaderCode, fragSize);
+  VkShaderModule vertShaderModule = mw_create_shader_module(
+      renderer->gpu.device.device, vertShaderCode, vertSize);
+  VkShaderModule fragShaderModule = mw_create_shader_module(
+      renderer->gpu.device.device, fragShaderCode, fragSize);
 
   VkPipelineShaderStageCreateInfo vertStageCreateInfo = {0};
   vertStageCreateInfo.sType =
@@ -173,9 +174,12 @@ mw_pipeline mw_renderer_create_pipeline(mw_device device,
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {0};
   pipelineLayoutCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipelineLayoutCreateInfo.setLayoutCount = 1;
+  pipelineLayoutCreateInfo.pSetLayouts = &renderer->descriptorSetLayout;
 
-  MW_ASSERT(vkCreatePipelineLayout(device.device, &pipelineLayoutCreateInfo,
-                                   NULL, &pipeline.layout) == VK_SUCCESS);
+  MW_ASSERT(vkCreatePipelineLayout(renderer->gpu.device.device,
+                                   &pipelineLayoutCreateInfo, NULL,
+                                   &pipeline.layout) == VK_SUCCESS);
 
   VkGraphicsPipelineCreateInfo pipelineCreateInfo = {0};
   pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -194,21 +198,24 @@ mw_pipeline mw_renderer_create_pipeline(mw_device device,
   pipelineCreateInfo.renderPass = pipeline.renderPass;
   pipelineCreateInfo.subpass = 0;
 
-  MW_ASSERT(vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1,
-                                      &pipelineCreateInfo, NULL,
-                                      &pipeline.pipeline) == VK_SUCCESS);
+  MW_ASSERT(vkCreateGraphicsPipelines(renderer->gpu.device.device,
+                                      VK_NULL_HANDLE, 1, &pipelineCreateInfo,
+                                      NULL, &pipeline.pipeline) == VK_SUCCESS);
 
   free(vertShaderCode);
   free(fragShaderCode);
 
-  vkDestroyShaderModule(device.device, vertShaderModule, NULL);
-  vkDestroyShaderModule(device.device, fragShaderModule, NULL);
+  vkDestroyShaderModule(renderer->gpu.device.device, vertShaderModule, NULL);
+  vkDestroyShaderModule(renderer->gpu.device.device, fragShaderModule, NULL);
 
-  return pipeline;
+  renderer->pipeline = pipeline;
 }
 
-void mw_renderer_destroy_pipeline(mw_device device, mw_pipeline pipeline) {
-  vkDestroyPipeline(device.device, pipeline.pipeline, NULL);
-  vkDestroyPipelineLayout(device.device, pipeline.layout, NULL);
-  vkDestroyRenderPass(device.device, pipeline.renderPass, NULL);
+void mw_renderer_destroy_pipeline(mw_renderer* renderer) {
+  vkDestroyPipeline(renderer->gpu.device.device, renderer->pipeline.pipeline,
+                    NULL);
+  vkDestroyPipelineLayout(renderer->gpu.device.device,
+                          renderer->pipeline.layout, NULL);
+  vkDestroyRenderPass(renderer->gpu.device.device,
+                      renderer->pipeline.renderPass, NULL);
 }

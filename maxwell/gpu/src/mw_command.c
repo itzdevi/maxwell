@@ -1,6 +1,7 @@
 #include "mw_command.h"
 
-#include "mw_core.h"
+#include <mw_core.h>
+
 #include "mw_queue.h"
 
 VkCommandPool create_command_pool(VkDevice device,

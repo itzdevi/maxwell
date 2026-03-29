@@ -11,8 +11,8 @@ mw_buffer mw_renderer_create_vertex_buffer(
     void* pData) {
   VkDeviceSize bufferSize = verticesCount * sizeof(mw_vertex);
   mw_buffer stagingBuffer = mw_renderer_create_buffer(
-      device, physicalDevice, surface, bufferSize, sizeof(mw_vertex),
-      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      device, physicalDevice, surface, bufferSize / sizeof(mw_vertex),
+      sizeof(mw_vertex), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 

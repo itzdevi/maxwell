@@ -6,7 +6,7 @@
 
 #include "renderer/mw_pipeline.h"
 #include "renderer/mw_swapchain.h"
-#include "resources/mw_buffer.h"
+#include "resources/mw_uniform_buffer.h"
 
 typedef struct mw_sync_objects {
   VkFence* frameFences;
@@ -20,6 +20,7 @@ typedef struct mw_renderer {
   mw_gpu_context gpu;
   VkSurfaceKHR surface;
   mw_swapchain swapchain;
+  VkDescriptorSetLayout descriptorSetLayout;
   mw_pipeline pipeline;
   VkFramebuffer* framebuffers;
   mw_command drawCommand;
@@ -28,6 +29,7 @@ typedef struct mw_renderer {
   int framebufferResized;
   vec2 framebufferSize;
   uint8_t currentFrame;
+  mw_ubo* uniformBuffers;
 } mw_renderer;
 
 #endif

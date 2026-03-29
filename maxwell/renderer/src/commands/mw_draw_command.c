@@ -1,6 +1,7 @@
 #include "mw_draw_command.h"
 
-#include "mw_core.h"
+#include <mw_core.h>
+
 #include "mw_renderer.h"
 #include "resources/mw_buffer.h"
 

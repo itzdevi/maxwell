@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 #include "commands/mw_draw_command.h"
+#include "core/mw_descriptor.h"
 #include "core/mw_renderer_def.h"
 #include "core/mw_surface.h"
 #include "renderer/mw_framebuffer.h"
@@ -27,16 +28,11 @@ void mw_recreate_swapchain(mw_renderer* renderer) {
   mw_renderer_destroy_sync_objects(renderer->gpu.device, renderer->syncObjects);
   mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
                                    renderer->framebuffers);
-  mw_renderer_destroy_pipeline(renderer->gpu.device, renderer->pipeline);
-  mw_renderer_destroy_swapchain(renderer->gpu.device, renderer->swapchain);
+  mw_renderer_destroy_pipeline(renderer);
 
-  renderer->swapchain = mw_renderer_create_swapchain(
-      renderer->gpu.physicalDevice, renderer->surface, renderer->gpu.device,
-      renderer->framebufferSize);
-  renderer->pipeline =
-      mw_renderer_create_pipeline(renderer->gpu.device, renderer->swapchain);
-  renderer->framebuffers = mw_renderer_create_framebuffers(
-      renderer->gpu.device, renderer->swapchain, renderer->pipeline);
+  mw_renderer_create_swapchain(renderer);
+  mw_renderer_create_pipeline(renderer);
+  mw_renderer_create_framebuffers(renderer);
   renderer->drawCommand =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
@@ -48,7 +44,7 @@ void mw_recreate_swapchain(mw_renderer* renderer) {
 mw_renderer* mw_renderer_initialize(mw_renderer_config config,
                                     mw_vertex* vertices, uint32_t verticesSize,
                                     uint16_t* indices, uint32_t indicesSize) {
-  mw_renderer* renderer = malloc(sizeof(mw_renderer));
+  mw_renderer* renderer = calloc(1, sizeof(mw_renderer));
   renderer->framebufferResized = 0;
   renderer->currentFrame = 0;
 
@@ -62,20 +58,20 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config,
   gpuConfig.surface = renderer->surface;
   renderer->gpu = mw_gpu_init(gpuConfig, instance);
 
-  renderer->swapchain = mw_renderer_create_swapchain(
-      renderer->gpu.physicalDevice, renderer->surface, renderer->gpu.device,
-      renderer->framebufferSize);
-
-  renderer->pipeline =
-      mw_renderer_create_pipeline(renderer->gpu.device, renderer->swapchain);
-  renderer->framebuffers = mw_renderer_create_framebuffers(
-      renderer->gpu.device, renderer->swapchain, renderer->pipeline);
+  mw_renderer_create_swapchain(renderer);
+  mw_renderer_create_descriptor_set_layout(renderer, 0,
+                                           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                           VK_SHADER_STAGE_VERTEX_BIT);
+  mw_renderer_create_pipeline(renderer);
+  mw_renderer_create_framebuffers(renderer);
   renderer->transferCommand =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, 1, TRANSFER);
   renderer->syncObjects = mw_renderer_create_sync_objects(
       renderer->gpu.device, MAX_FRAMES_IN_FLIGHT,
       renderer->swapchain.imageCount);
+
+  mw_renderer_create_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
 
   void* pVertex;
   vertexBuffer = mw_renderer_create_vertex_buffer(
@@ -106,8 +102,12 @@ void mw_renderer_destroy(mw_renderer* renderer) {
   mw_renderer_destroy_buffer(renderer->gpu.device, indexBuffer);
   mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
                                    renderer->framebuffers);
-  mw_renderer_destroy_pipeline(renderer->gpu.device, renderer->pipeline);
-  mw_renderer_destroy_swapchain(renderer->gpu.device, renderer->swapchain);
+  mw_renderer_destroy_pipeline(renderer);
+  mw_renderer_destroy_swapchain(renderer);
+  mw_renderer_destroy_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
+  mw_renderer_destroy_descriptor_set_layout(renderer);
+
+  mw_renderer_destroy_surface(renderer->gpu.instance, renderer->surface);
 
   mw_gpu_destroy(renderer->gpu);
 
@@ -142,6 +142,8 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   mw_renderer_record_draw_command_buffer(renderer, vertexBuffer, indexBuffer,
                                          imageIndex);
 
+  mw_renderer_update_current_uniform_buffer(renderer);
+
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   submitInfo.commandBufferCount = 1;
@@ -171,9 +173,12 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
       renderer->framebufferResized) {
     renderer->framebufferResized = 0;
-    mw_recreate_swapchain(renderer);
-  } else
+  } else {
+    if (!renderer->framebufferResized) {
+      mw_recreate_swapchain(renderer);
+    }
     MW_ASSERT(result == VK_SUCCESS);
+  }
 
   renderer->currentFrame = (renderer->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

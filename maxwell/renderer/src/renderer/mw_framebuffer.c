@@ -1,30 +1,31 @@
 #include "mw_framebuffer.h"
 
-#include "mw_core.h"
+#include <mw_core.h>
 
-VkFramebuffer* mw_renderer_create_framebuffers(mw_device device,
-                                               mw_swapchain swapchain,
-                                               mw_pipeline pipeline) {
+#include "core/mw_renderer_def.h"
+
+void mw_renderer_create_framebuffers(mw_renderer* renderer) {
   VkFramebuffer* framebuffers =
-      malloc(swapchain.imageCount * sizeof(VkFramebuffer));
+      malloc(renderer->swapchain.imageCount * sizeof(VkFramebuffer));
 
-  for (size_t i = 0; i < swapchain.imageCount; i++) {
-    VkImageView attachments[] = {swapchain.imageViews[i]};
+  for (size_t i = 0; i < renderer->swapchain.imageCount; i++) {
+    VkImageView attachments[] = {renderer->swapchain.imageViews[i]};
 
     VkFramebufferCreateInfo framebufferCreateInfo = {0};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCreateInfo.renderPass = pipeline.renderPass;
+    framebufferCreateInfo.renderPass = renderer->pipeline.renderPass;
     framebufferCreateInfo.attachmentCount = 1;
     framebufferCreateInfo.pAttachments = attachments;
-    framebufferCreateInfo.width = swapchain.extent.width;
-    framebufferCreateInfo.height = swapchain.extent.height;
+    framebufferCreateInfo.width = renderer->swapchain.extent.width;
+    framebufferCreateInfo.height = renderer->swapchain.extent.height;
     framebufferCreateInfo.layers = 1;
 
-    MW_ASSERT(vkCreateFramebuffer(device.device, &framebufferCreateInfo, NULL,
+    MW_ASSERT(vkCreateFramebuffer(renderer->gpu.device.device,
+                                  &framebufferCreateInfo, NULL,
                                   &framebuffers[i]) == VK_SUCCESS);
   }
 
-  return framebuffers;
+  renderer->framebuffers = framebuffers;
 }
 
 void mw_renderer_destroy_framebuffers(mw_device device, mw_swapchain swapchain,

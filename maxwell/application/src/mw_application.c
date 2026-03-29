@@ -2,8 +2,8 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <mw_core.h>
 
-#include "mw_core.h"
 #include "mw_renderer.h"
 
 GLFWwindow* window;
@@ -65,6 +65,7 @@ void mw_app_start(mw_app_info info) {
     mw_renderer_draw_frame(renderer);
   }
   mw_renderer_wait_for_idle(renderer);
+  mw_renderer_destroy(renderer);
 
   glfwDestroyWindow(window);
   glfwTerminate();

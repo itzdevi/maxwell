@@ -1,6 +1,7 @@
 #include "mw_physical_device.h"
 
-#include "mw_core.h"
+#include <mw_core.h>
+
 #include "mw_device.h"
 #include "mw_queue.h"
 

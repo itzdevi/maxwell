@@ -5,6 +5,8 @@
 #include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
+#include "mw_renderer.h"
+
 typedef struct mw_swapchain {
   VkSwapchainKHR swapchain;
   unsigned int imageCount;
@@ -14,10 +16,7 @@ typedef struct mw_swapchain {
   VkImageView* imageViews;
 } mw_swapchain;
 
-mw_swapchain mw_renderer_create_swapchain(VkPhysicalDevice physicalDevice,
-                                          VkSurfaceKHR surface,
-                                          mw_device device,
-                                          vec2 framebufferSize);
-void mw_renderer_destroy_swapchain(mw_device device, mw_swapchain swapchain);
+void mw_renderer_create_swapchain(mw_renderer* renderer);
+void mw_renderer_destroy_swapchain(mw_renderer* renderer);
 
 #endif

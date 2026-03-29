@@ -1,8 +1,7 @@
 #include "mw_surface.h"
 
+#include <mw_core.h>
 #include <stdio.h>
-
-#include "mw_core.h"
 
 VkSurfaceKHR mw_renderer_create_surface(mw_renderer_config config,
                                         VkInstance instance) {
