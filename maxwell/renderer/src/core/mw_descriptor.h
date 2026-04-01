@@ -11,4 +11,13 @@ void mw_renderer_create_descriptor_set_layout(mw_renderer* renderer,
                                               VkShaderStageFlags shaderStage);
 void mw_renderer_destroy_descriptor_set_layout(mw_renderer* renderer);
 
+void mw_renderer_create_descriptor_pool(mw_renderer* renderer,
+                                        VkDescriptorType descriptorType,
+                                        uint32_t framesInFlight);
+void mw_renderer_destroy_descriptor_pool(mw_renderer* renderer);
+
+void mw_renderer_create_descriptor_sets(mw_renderer* renderer,
+                                        uint32_t framesInFlight);
+void mw_renderer_destroy_descriptor_sets(mw_renderer* renderer);
+
 #endif

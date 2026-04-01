@@ -2,6 +2,8 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#define CGLTF_IMPLEMENTATION
+#include <cgltf.h>
 #include <mw_core.h>
 
 #include "mw_renderer.h"
@@ -30,11 +32,10 @@ VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface) {
 }
 
 void mw_app_start(mw_app_info info) {
-  mw_vertex vertices[] = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                          {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-                          {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-                          {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
-  uint16_t indices[] = {0, 1, 2, 2, 3, 0};
+  cgltf_options options = {0};
+  cgltf_data* data = NULL;
+  MW_ASSERT(cgltf_parse_file(&options, "../assets/models/adamHead.gltf",
+                             &data) == cgltf_result_success);
 
   MW_ASSERT(glfwInit());
 
@@ -52,8 +53,7 @@ void mw_app_start(mw_app_info info) {
       .extensions = extensions,
       .surfaceCreator = &mw_app_create_surface};
   glm_vec2_copy(info.size, rendererConfig.framebufferSize);
-  renderer = mw_renderer_initialize(rendererConfig, vertices, sizeof(vertices),
-                                    indices, sizeof(indices));
+  renderer = mw_renderer_initialize(rendererConfig);
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -66,6 +66,8 @@ void mw_app_start(mw_app_info info) {
   }
   mw_renderer_wait_for_idle(renderer);
   mw_renderer_destroy(renderer);
+
+  cgltf_free(data);
 
   glfwDestroyWindow(window);
   glfwTerminate();

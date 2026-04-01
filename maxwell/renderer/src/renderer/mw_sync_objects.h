@@ -4,7 +4,13 @@
 #include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
-#include "core/mw_renderer_def.h"
+typedef struct mw_sync_objects {
+  VkFence* frameFences;
+  VkSemaphore* acquireSemaphores;
+  VkSemaphore* submitSemaphores;
+  uint8_t framesInFlight;
+  uint8_t swapchainImages;
+} mw_sync_objects;
 
 mw_sync_objects mw_renderer_create_sync_objects(
     mw_device device, const unsigned int maxFramesInFlight,

@@ -5,8 +5,9 @@
 #include <vulkan/vulkan.h>
 
 typedef struct mw_vertex {
-  vec2 position;
-  vec3 color;
+  vec3 position;
+  vec3 normal;
+  vec2 uv;
 } mw_vertex;
 
 VkVertexInputBindingDescription mw_renderer_get_vertex_binding_description();

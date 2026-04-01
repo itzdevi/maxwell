@@ -11,6 +11,7 @@
 #include "core/mw_surface.h"
 #include "renderer/mw_framebuffer.h"
 #include "renderer/mw_pipeline.h"
+#include "renderer/mw_render_queue.h"
 #include "renderer/mw_swapchain.h"
 #include "renderer/mw_sync_objects.h"
 #include "resources/mw_buffer.h"
@@ -18,8 +19,6 @@
 #include "resources/mw_vertex_buffer.h"
 
 const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
-mw_buffer vertexBuffer;
-mw_buffer indexBuffer;
 
 void mw_recreate_swapchain(mw_renderer* renderer) {
   vkDeviceWaitIdle(renderer->gpu.device.device);
@@ -41,9 +40,7 @@ void mw_recreate_swapchain(mw_renderer* renderer) {
       renderer->swapchain.imageCount);
 }
 
-mw_renderer* mw_renderer_initialize(mw_renderer_config config,
-                                    mw_vertex* vertices, uint32_t verticesSize,
-                                    uint16_t* indices, uint32_t indicesSize) {
+mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
   mw_renderer* renderer = calloc(1, sizeof(mw_renderer));
   renderer->framebufferResized = 0;
   renderer->currentFrame = 0;
@@ -59,9 +56,16 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config,
   renderer->gpu = mw_gpu_init(gpuConfig, instance);
 
   mw_renderer_create_swapchain(renderer);
+
+  mw_renderer_create_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
+
   mw_renderer_create_descriptor_set_layout(renderer, 0,
                                            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                            VK_SHADER_STAGE_VERTEX_BIT);
+  mw_renderer_create_descriptor_pool(
+      renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, MAX_FRAMES_IN_FLIGHT);
+  mw_renderer_create_descriptor_sets(renderer, MAX_FRAMES_IN_FLIGHT);
+
   mw_renderer_create_pipeline(renderer);
   mw_renderer_create_framebuffers(renderer);
   renderer->transferCommand =
@@ -71,23 +75,12 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config,
       renderer->gpu.device, MAX_FRAMES_IN_FLIGHT,
       renderer->swapchain.imageCount);
 
-  mw_renderer_create_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
-
-  void* pVertex;
-  vertexBuffer = mw_renderer_create_vertex_buffer(
-      renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
-      vertices, verticesSize / sizeof(mw_vertex), renderer->transferCommand,
-      pVertex);
-
-  void* pIndex;
-  indexBuffer = mw_renderer_create_index_buffer(
-      renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
-      indices, indicesSize / sizeof(uint16_t), renderer->transferCommand,
-      pIndex);
-
   renderer->drawCommand =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
+
+  mw_renderer_create_render_page(renderer);
+  mw_renderer_clean_render_queue(renderer);
 
   return renderer;
 }
@@ -95,17 +88,19 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config,
 void mw_renderer_destroy(mw_renderer* renderer) {
   vkDeviceWaitIdle(renderer->gpu.device.device);
 
+  mw_renderer_destroy_render_pages(renderer);
+
   mw_renderer_destroy_sync_objects(renderer->gpu.device, renderer->syncObjects);
   mw_gpu_destroy_command(renderer->gpu.device, renderer->drawCommand);
   mw_gpu_destroy_command(renderer->gpu.device, renderer->transferCommand);
-  mw_renderer_destroy_buffer(renderer->gpu.device, vertexBuffer);
-  mw_renderer_destroy_buffer(renderer->gpu.device, indexBuffer);
   mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
                                    renderer->framebuffers);
   mw_renderer_destroy_pipeline(renderer);
   mw_renderer_destroy_swapchain(renderer);
   mw_renderer_destroy_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
+  mw_renderer_destroy_descriptor_pool(renderer);
   mw_renderer_destroy_descriptor_set_layout(renderer);
+  mw_renderer_destroy_descriptor_sets(renderer);
 
   mw_renderer_destroy_surface(renderer->gpu.instance, renderer->surface);
 
@@ -137,12 +132,12 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   VkSemaphore submitSemaphore =
       renderer->syncObjects.submitSemaphores[imageIndex];
 
+  // Update uniform buffer BEFORE recording command buffer
+  mw_renderer_update_current_uniform_buffer(renderer);
+
   vkResetCommandBuffer(renderer->drawCommand.buffers[renderer->currentFrame],
                        0);
-  mw_renderer_record_draw_command_buffer(renderer, vertexBuffer, indexBuffer,
-                                         imageIndex);
-
-  mw_renderer_update_current_uniform_buffer(renderer);
+  mw_renderer_record_draw_command_buffer(renderer, imageIndex);
 
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -181,7 +176,10 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   }
 
   renderer->currentFrame = (renderer->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+  mw_renderer_clean_render_queue(renderer);
 }
+
+void mw_renderer_push_render_queue(mw_renderer* renderer, uint32_t meshIndex) {}
 
 void mw_renderer_wait_for_idle(mw_renderer* renderer) {
   vkDeviceWaitIdle(renderer->gpu.device.device);

@@ -1,11 +1,16 @@
 #include "mw_gpu.h"
 
+#include <mw_core.h>
+
 #include "mw_device.h"
 #include "mw_instance.h"
 #include "mw_physical_device.h"
 
 mw_gpu_context mw_gpu_init(mw_gpu_config config, VkInstance instance) {
   mw_gpu_context ctx = {0};
+
+  MW_ASSERT(instance);
+
   ctx.instance = instance;
   ctx.physicalDevice =
       mw_gpu_pick_physical_device(ctx.instance, config.surface);

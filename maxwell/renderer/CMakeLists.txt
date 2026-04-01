@@ -6,8 +6,9 @@ add_library(renderer STATIC
     src/renderer/mw_pipeline.c
     src/renderer/mw_framebuffer.c
     src/renderer/mw_sync_objects.c
-    src/resources/mw_uniform_buffer.c
     src/renderer/mw_vertex.c
+    src/renderer/mw_render_queue.c
+    src/resources/mw_uniform_buffer.c
     src/commands/mw_draw_command.c
     src/resources/mw_buffer.c
     src/resources/mw_vertex_buffer.c

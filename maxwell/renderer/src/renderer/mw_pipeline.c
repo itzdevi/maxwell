@@ -72,8 +72,8 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
   unsigned int vertSize = 0;
   unsigned int fragSize = 0;
 
-  char* vertShaderCode = mw_read_file("../shaders/vert.spv", &vertSize);
-  char* fragShaderCode = mw_read_file("../shaders/frag.spv", &fragSize);
+  char* vertShaderCode = mw_read_file("../assets/shaders/vert.spv", &vertSize);
+  char* fragShaderCode = mw_read_file("../assets/shaders/frag.spv", &fragSize);
 
   MW_ASSERT(vertSize % 4 == 0);
   MW_ASSERT(fragSize % 4 == 0);

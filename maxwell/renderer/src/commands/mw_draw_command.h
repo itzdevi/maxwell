@@ -9,8 +9,6 @@
 #include "resources/mw_buffer.h"
 
 void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
-                                            mw_buffer vertexBuffer,
-                                            mw_buffer indexBuffer,
                                             unsigned int imageIndex);
 
 #endif

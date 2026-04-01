@@ -6,8 +6,6 @@
 #include "resources/mw_buffer.h"
 
 void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
-                                            mw_buffer vertexBuffer,
-                                            mw_buffer indexBuffer,
                                             unsigned int imageIndex) {
   VkCommandBufferBeginInfo commandBufferBeginInfo = {0};
   commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -49,13 +47,19 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   scissor.extent = renderer->swapchain.extent;
   vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
 
-  VkBuffer buffers[] = {vertexBuffer.buffer};
-  VkDeviceSize offsets[] = {0};
-  vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, buffers, offsets);
-  vkCmdBindIndexBuffer(currentCommandBuffer, indexBuffer.buffer, 0,
-                       VK_INDEX_TYPE_UINT16);
-  vkCmdDrawIndexed(currentCommandBuffer, indexBuffer.size / indexBuffer.stride,
-                   1, 0, 0, 0);
+  // TODO: IMPLEMENT INDEXED DRAWING FOR ALL GIVEN VERTEX BUFFERS
+  //   VkBuffer buffers[] = {vertexBuffer.buffer};
+  //   VkDeviceSize offsets[] = {0};
+  //   vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, buffers, offsets);
+  //   vkCmdBindIndexBuffer(currentCommandBuffer, indexBuffer.buffer, 0,
+  //                        VK_INDEX_TYPE_UINT16);
+  vkCmdBindDescriptorSets(currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          renderer->pipeline.layout, 0, 1,
+                          &renderer->descriptorSets[renderer->currentFrame], 0,
+                          NULL);
+  //   vkCmdDrawIndexed(currentCommandBuffer, indexBuffer.size /
+  //   indexBuffer.stride,
+  //                    1, 0, 0, 0);
 
   vkCmdEndRenderPass(currentCommandBuffer);
   MW_ASSERT(vkEndCommandBuffer(currentCommandBuffer) == VK_SUCCESS);
