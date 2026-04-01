@@ -30,6 +30,7 @@ typedef struct mw_renderer {
   mw_render_page* renderPages;
   uint32_t renderPagesCount;
   uint32_t currentPage;
+  uint32_t currentPageOffset;
 } mw_renderer;
 
 #endif

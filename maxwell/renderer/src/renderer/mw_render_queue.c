@@ -29,6 +29,7 @@ void mw_renderer_clean_render_queue(mw_renderer* renderer) {
     renderer->renderPages[i].length = 0;
   }
   renderer->currentPage = 0;
+  renderer->currentPageOffset = 0;
 }
 
 void mw_renderer_push_render_pass(mw_renderer* renderer,
@@ -40,6 +41,23 @@ void mw_renderer_push_render_pass(mw_renderer* renderer,
   if (renderer->renderPagesCount == renderer->currentPage)
     mw_renderer_create_render_page(renderer);
 
-  mw_render_page currentPage = renderer->renderPages[renderer->currentPage];
-  currentPage.passes[currentPage.length] = renderPass;
+  mw_render_page* currentPage = &renderer->renderPages[renderer->currentPage];
+  currentPage->passes[currentPage->length++] = renderPass;
+}
+
+int mw_renderer_pop_render_pass(mw_renderer* renderer,
+                                mw_render_pass* renderPass) {
+  uint32_t currentPage = 0;
+  while (!renderer->renderPages[currentPage].length) {
+    currentPage++;
+    renderer->currentPageOffset = 0;
+  }
+
+  if (currentPage == renderer->renderPagesCount) return 0;
+
+  *renderPass =
+      renderer->renderPages[currentPage].passes[renderer->currentPageOffset++];
+  renderer->renderPages[currentPage].length--;
+
+  return 1;
 }

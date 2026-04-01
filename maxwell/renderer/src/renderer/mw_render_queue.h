@@ -16,5 +16,7 @@ void mw_renderer_destroy_render_pages(mw_renderer* renderer);
 void mw_renderer_clean_render_queue(mw_renderer* renderer);
 void mw_renderer_push_render_pass(mw_renderer* renderer,
                                   mw_render_pass renderPass);
+int mw_renderer_pop_render_pass(mw_renderer* renderer,
+                                mw_render_pass* renderPass);
 
 #endif

@@ -47,6 +47,11 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   scissor.extent = renderer->swapchain.extent;
   vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
 
+  mw_render_pass renderPass;
+  while (mw_renderer_pop_render_pass(renderer, &renderPass)) {
+    // draw mesh
+  }
+
   // TODO: IMPLEMENT INDEXED DRAWING FOR ALL GIVEN VERTEX BUFFERS
   //   VkBuffer buffers[] = {vertexBuffer.buffer};
   //   VkDeviceSize offsets[] = {0};
