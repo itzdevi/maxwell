@@ -33,17 +33,14 @@ void mw_renderer_destroy_uniform_buffers(mw_renderer* renderer,
   free(renderer->uniformBuffers);
 }
 
-void mw_renderer_update_current_uniform_buffer(mw_renderer* renderer) {
-  float dt = 0.001f;
+void mw_renderer_update_current_uniform_buffer(mw_renderer* renderer,
+                                               mat4 transform) {
   float ar = renderer->framebufferSize[0] / renderer->framebufferSize[1];
 
   mw_mvp mvp = {0};
-  glm_mat4_identity(mvp.model);
-  glm_translate(mvp.model, (vec3){2, 4, 0});
-  glm_rotate(mvp.model, 90, (vec3){1, 0, 0});
-  glm_scale(mvp.model, (vec3){10, 10, 1});
+  glm_mat4_copy(transform, mvp.model);
   glm_perspective(45, ar, 0.1, 1000, mvp.proj);
-  glm_lookat((vec3){0, 0, 0}, (vec3){0, 0, 1}, (vec3){0, 1, 0}, mvp.view);
+  glm_lookat((vec3){0, 0, -4}, (vec3){0, 0, 1}, (vec3){0, 1, 0}, mvp.view);
   memcpy(renderer->uniformBuffers[renderer->currentFrame].data, &mvp,
          sizeof(mw_mvp));
 }

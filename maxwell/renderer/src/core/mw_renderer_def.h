@@ -29,8 +29,11 @@ typedef struct mw_renderer {
   mw_ubo* uniformBuffers;
   mw_render_page* renderPages;
   uint32_t renderPagesCount;
-  uint32_t currentPage;
+  uint32_t currentPushPage;
+  uint32_t currentPopPage;
   uint32_t currentPageOffset;
+  mw_buffer vertexBuffer;
+  mw_buffer indexBuffer;
 } mw_renderer;
 
 #endif

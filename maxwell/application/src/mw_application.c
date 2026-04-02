@@ -61,10 +61,9 @@ void mw_app_start(mw_app_info info) {
     mw_app_get_framebuffer_size(fbSize);
     if (fbSize[0] == 0 || fbSize[1] == 0) glfwWaitEvents();
 
-    mw_render_pass renderPass = {.meshIndex = 82};
+    mw_render_pass renderPass = {.meshIndex = 0};
     glm_mat4_copy(transform, renderPass.transform);
-    for (size_t i = 0; i < 2042; i++)
-      mw_renderer_push_render_pass(renderer, renderPass);
+    mw_renderer_push_render_pass(renderer, renderPass);
 
     mw_renderer_draw_frame(renderer);
   }

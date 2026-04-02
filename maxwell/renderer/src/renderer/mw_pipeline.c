@@ -102,16 +102,15 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
 
   VkVertexInputBindingDescription bindingDescription =
       mw_renderer_get_vertex_binding_description();
-  VkVertexInputAttributeDescription attributeDescriptions[2] = {0};
+  VkVertexInputAttributeDescription attributeDescriptions[3] = {0};
   mw_renderer_get_vertex_attribute_description(attributeDescriptions);
 
   VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo = {0};
   vertexInputCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
   vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
-  vertexInputCreateInfo.vertexAttributeDescriptionCount =
-      sizeof(attributeDescriptions) / sizeof(VkVertexInputAttributeDescription);
   vertexInputCreateInfo.pVertexBindingDescriptions = &bindingDescription;
+  vertexInputCreateInfo.vertexAttributeDescriptionCount = 3;
   vertexInputCreateInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyCreateInfo = {0};

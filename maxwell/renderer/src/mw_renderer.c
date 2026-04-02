@@ -41,6 +41,12 @@ void mw_recreate_swapchain(mw_renderer* renderer) {
 }
 
 mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
+  mw_vertex vertices[] = {{.position = {-0.5, 0.5, 0}},
+                          {.position = {0.0, -0.5, 0}},
+                          {.position = {0.5, 0.5, 0}}};
+
+  uint16_t indices[] = {0, 1, 2};
+
   mw_renderer* renderer = calloc(1, sizeof(mw_renderer));
   renderer->framebufferResized = 0;
   renderer->currentFrame = 0;
@@ -79,8 +85,14 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
 
-  mw_renderer_create_render_page(renderer);
-  mw_renderer_clean_render_queue(renderer);
+  void* p;
+  renderer->vertexBuffer = mw_renderer_create_vertex_buffer(
+      renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
+      vertices, 3, renderer->transferCommand, p);
+
+  renderer->indexBuffer = mw_renderer_create_index_buffer(
+      renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
+      indices, 3, renderer->transferCommand, p);
 
   return renderer;
 }
@@ -89,6 +101,9 @@ void mw_renderer_destroy(mw_renderer* renderer) {
   vkDeviceWaitIdle(renderer->gpu.device.device);
 
   mw_renderer_destroy_render_pages(renderer);
+
+  mw_renderer_destroy_buffer(renderer->gpu.device, renderer->vertexBuffer);
+  mw_renderer_destroy_buffer(renderer->gpu.device, renderer->indexBuffer);
 
   mw_renderer_destroy_sync_objects(renderer->gpu.device, renderer->syncObjects);
   mw_gpu_destroy_command(renderer->gpu.device, renderer->drawCommand);
@@ -131,9 +146,6 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
 
   VkSemaphore submitSemaphore =
       renderer->syncObjects.submitSemaphores[imageIndex];
-
-  // Update uniform buffer BEFORE recording command buffer
-  mw_renderer_update_current_uniform_buffer(renderer);
 
   vkResetCommandBuffer(renderer->drawCommand.buffers[renderer->currentFrame],
                        0);

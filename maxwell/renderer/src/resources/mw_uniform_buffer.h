@@ -21,6 +21,7 @@ void mw_renderer_create_uniform_buffers(mw_renderer* renderer,
                                         uint32_t framesInFlight);
 void mw_renderer_destroy_uniform_buffers(mw_renderer* renderer,
                                          uint32_t framesInFlight);
-void mw_renderer_update_current_uniform_buffer(mw_renderer* renderer);
+void mw_renderer_update_current_uniform_buffer(mw_renderer* renderer,
+                                               mat4 transform);
 
 #endif

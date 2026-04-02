@@ -28,36 +28,44 @@ void mw_renderer_clean_render_queue(mw_renderer* renderer) {
   for (size_t i = 0; i < renderer->renderPagesCount; i++) {
     renderer->renderPages[i].length = 0;
   }
-  renderer->currentPage = 0;
+  renderer->currentPushPage = 0;
+  renderer->currentPopPage = 0;
   renderer->currentPageOffset = 0;
 }
 
 void mw_renderer_push_render_pass(mw_renderer* renderer,
                                   mw_render_pass renderPass) {
-  if (renderer->renderPages[renderer->currentPage].length ==
+  if (!renderer->renderPagesCount) mw_renderer_create_render_page(renderer);
+
+  if (renderer->renderPages[renderer->currentPushPage].length ==
       RENDER_QUEUE_PAGE_SIZE) {
-    renderer->currentPage++;
+    renderer->currentPushPage++;
   }
-  if (renderer->renderPagesCount == renderer->currentPage)
+  if (renderer->renderPagesCount == renderer->currentPushPage)
     mw_renderer_create_render_page(renderer);
 
-  mw_render_page* currentPage = &renderer->renderPages[renderer->currentPage];
+  mw_render_page* currentPage =
+      &renderer->renderPages[renderer->currentPushPage];
   currentPage->passes[currentPage->length++] = renderPass;
 }
 
 int mw_renderer_pop_render_pass(mw_renderer* renderer,
                                 mw_render_pass* renderPass) {
-  uint32_t currentPage = 0;
-  while (!renderer->renderPages[currentPage].length) {
-    currentPage++;
+  if (!renderer->renderPagesCount) return 0;
+
+  mw_render_page* currentPage =
+      &renderer->renderPages[renderer->currentPopPage];
+
+  while (!currentPage->length) {
+    renderer->currentPopPage++;
     renderer->currentPageOffset = 0;
+    currentPage = &renderer->renderPages[renderer->currentPopPage];
+
+    if (renderer->currentPopPage == renderer->renderPagesCount) return 0;
   }
 
-  if (currentPage == renderer->renderPagesCount) return 0;
-
-  *renderPass =
-      renderer->renderPages[currentPage].passes[renderer->currentPageOffset++];
-  renderer->renderPages[currentPage].length--;
+  *renderPass = currentPage->passes[renderer->currentPageOffset++];
+  currentPage->length--;
 
   return 1;
 }
