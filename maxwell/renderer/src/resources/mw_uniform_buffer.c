@@ -10,11 +10,11 @@ void mw_renderer_create_uniform_buffers(mw_renderer* renderer,
   renderer->uniformBuffers = malloc(sizeof(mw_ubo) * framesInFlight);
 
   for (size_t i = 0; i < framesInFlight; i++) {
-    renderer->uniformBuffers[i].buffer = mw_renderer_create_buffer(
-        renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
-        framesInFlight, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    renderer->uniformBuffers[i].buffer =
+        mw_renderer_create_buffer(renderer, framesInFlight, bufferSize,
+                                  VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     vkMapMemory(renderer->gpu.device.device,
                 renderer->uniformBuffers[i].buffer.memory, 0, bufferSize, 0,
@@ -27,8 +27,7 @@ void mw_renderer_destroy_uniform_buffers(mw_renderer* renderer,
   for (size_t i = 0; i < framesInFlight; i++) {
     vkUnmapMemory(renderer->gpu.device.device,
                   renderer->uniformBuffers[i].buffer.memory);
-    mw_renderer_destroy_buffer(renderer->gpu.device,
-                               renderer->uniformBuffers[i].buffer);
+    mw_renderer_destroy_buffer(renderer, renderer->uniformBuffers[i].buffer);
   }
   free(renderer->uniformBuffers);
 }

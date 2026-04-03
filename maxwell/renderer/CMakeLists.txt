@@ -13,6 +13,7 @@ add_library(renderer STATIC
     src/resources/mw_buffer.c
     src/resources/mw_vertex_buffer.c
     src/resources/mw_index_buffer.c
+    src/resources/mw_mesh.c
 )
 
 

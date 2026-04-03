@@ -48,9 +48,15 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
 
   VkBuffer buffers[] = {renderer->vertexBuffer.buffer};
+  VkDeviceSize offsets[] = {0};
+  vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, buffers, offsets);
+  vkCmdBindIndexBuffer(currentCommandBuffer, renderer->indexBuffer.buffer, 0,
+                       VK_INDEX_TYPE_UINT32);
 
   mw_render_pass renderPass;
   while (mw_renderer_pop_render_pass(renderer, &renderPass)) {
+    mw_mesh mesh = renderer->meshes[renderPass.meshIndex];
+
     mw_renderer_update_current_uniform_buffer(renderer, renderPass.transform);
 
     vkCmdBindDescriptorSets(
@@ -58,11 +64,8 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
         renderer->pipeline.layout, 0, 1,
         &renderer->descriptorSets[renderer->currentFrame], 0, NULL);
 
-    VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, buffers, offsets);
-    vkCmdBindIndexBuffer(currentCommandBuffer, renderer->indexBuffer.buffer, 0,
-                         VK_INDEX_TYPE_UINT16);
-    vkCmdDrawIndexed(currentCommandBuffer, 3, 1, 0, 0, 0);
+    vkCmdDrawIndexed(currentCommandBuffer, mesh.indicesCount, 1,
+                     mesh.indicesOffset, mesh.verticesOffset, 0);
   }
 
   vkCmdEndRenderPass(currentCommandBuffer);

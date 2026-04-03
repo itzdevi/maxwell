@@ -5,9 +5,8 @@
 
 #include "resources/mw_buffer.h"
 
-mw_buffer mw_renderer_create_index_buffer(
-    mw_device device, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface,
-    uint16_t* indices, uint32_t indicesCount, mw_command transferCommand,
-    void* pData);
+mw_buffer mw_renderer_create_index_buffer(mw_renderer* renderer,
+                                          uint32_t* indices,
+                                          uint32_t indicesCount, void* pData);
 
 #endif

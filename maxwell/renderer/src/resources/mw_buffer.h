@@ -4,7 +4,7 @@
 #include <mw_gpu.h>
 #include <vulkan/vulkan.h>
 
-#include "mw_renderer_vertex.h"
+#include "mw_renderer.h"
 
 typedef struct mw_buffer {
   VkBuffer buffer;
@@ -13,13 +13,11 @@ typedef struct mw_buffer {
   size_t stride;
 } mw_buffer;
 
-mw_buffer mw_renderer_create_buffer(mw_device device,
-                                    VkPhysicalDevice physicalDevice,
-                                    VkSurfaceKHR surface, uint32_t count,
+mw_buffer mw_renderer_create_buffer(mw_renderer* renderer, uint32_t count,
                                     uint32_t stride, VkBufferUsageFlags usage,
                                     VkMemoryPropertyFlags properties);
-void mw_renderer_destroy_buffer(mw_device device, mw_buffer buffer);
-void mw_renderer_copy_buffer(mw_device device, mw_buffer srcBuffer,
-                             mw_buffer dstBuffer, mw_command transferCommand);
+void mw_renderer_destroy_buffer(mw_renderer* renderer, mw_buffer buffer);
+void mw_renderer_copy_buffer(mw_renderer* renderer, mw_buffer srcBuffer,
+                             mw_buffer dstBuffer);
 
 #endif

@@ -45,7 +45,7 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
                           {.position = {0.0, -0.5, 0}},
                           {.position = {0.5, 0.5, 0}}};
 
-  uint16_t indices[] = {0, 1, 2};
+  uint32_t indices[] = {0, 1, 2};
 
   mw_renderer* renderer = calloc(1, sizeof(mw_renderer));
   renderer->framebufferResized = 0;
@@ -85,14 +85,11 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
 
-  void* p;
-  renderer->vertexBuffer = mw_renderer_create_vertex_buffer(
-      renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
-      vertices, 3, renderer->transferCommand, p);
+  uint32_t triangle = mw_renderer_add_mesh(renderer, vertices, sizeof(vertices),
+                                           indices, sizeof(indices));
+  mw_renderer_create_meshes(renderer);
 
-  renderer->indexBuffer = mw_renderer_create_index_buffer(
-      renderer->gpu.device, renderer->gpu.physicalDevice, renderer->surface,
-      indices, 3, renderer->transferCommand, p);
+  mw_renderer_destroy_mesh_pool(renderer);
 
   return renderer;
 }
@@ -100,10 +97,8 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
 void mw_renderer_destroy(mw_renderer* renderer) {
   vkDeviceWaitIdle(renderer->gpu.device.device);
 
+  mw_renderer_destroy_meshes(renderer);
   mw_renderer_destroy_render_pages(renderer);
-
-  mw_renderer_destroy_buffer(renderer->gpu.device, renderer->vertexBuffer);
-  mw_renderer_destroy_buffer(renderer->gpu.device, renderer->indexBuffer);
 
   mw_renderer_destroy_sync_objects(renderer->gpu.device, renderer->syncObjects);
   mw_gpu_destroy_command(renderer->gpu.device, renderer->drawCommand);
