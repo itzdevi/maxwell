@@ -24,6 +24,7 @@ typedef struct mw_render_pass {
 typedef struct mw_renderer mw_renderer;
 
 mw_renderer* mw_renderer_initialize(mw_renderer_config config);
+void mw_renderer_submit_meshes(mw_renderer* renderer);
 void mw_renderer_destroy(mw_renderer* renderer);
 void mw_renderer_draw_frame(mw_renderer* renderer);
 void mw_renderer_wait_for_idle(mw_renderer* renderer);

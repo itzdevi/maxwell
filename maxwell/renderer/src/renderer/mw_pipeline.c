@@ -4,6 +4,7 @@
 
 #include "core/mw_renderer_def.h"
 #include "mw_renderer_vertex.h"
+#include "resources/mw_push_constants.h"
 
 VkShaderModule mw_create_shader_module(VkDevice device, const char* code,
                                        unsigned int size) {
@@ -175,6 +176,14 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
       VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutCreateInfo.setLayoutCount = 1;
   pipelineLayoutCreateInfo.pSetLayouts = &renderer->descriptorSetLayout;
+
+  VkPushConstantRange range = {0};
+  range.offset = 0;
+  range.size = sizeof(mw_push_constants_data);
+  range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+  pipelineLayoutCreateInfo.pPushConstantRanges = &range;
+  pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 
   MW_ASSERT(vkCreatePipelineLayout(renderer->gpu.device.device,
                                    &pipelineLayoutCreateInfo, NULL,

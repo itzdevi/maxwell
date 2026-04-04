@@ -4,6 +4,7 @@
 
 #include "mw_renderer.h"
 #include "resources/mw_buffer.h"
+#include "resources/mw_push_constants.h"
 
 void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
                                             unsigned int imageIndex) {
@@ -57,12 +58,11 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   while (mw_renderer_pop_render_pass(renderer, &renderPass)) {
     mw_mesh mesh = renderer->meshes[renderPass.meshIndex];
 
-    mw_renderer_update_current_uniform_buffer(renderer, renderPass.transform);
-
-    vkCmdBindDescriptorSets(
-        currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        renderer->pipeline.layout, 0, 1,
-        &renderer->descriptorSets[renderer->currentFrame], 0, NULL);
+    mw_push_constants_data pushConstants =
+        mw_renderer_get_push_constants(renderer, renderPass.transform);
+    vkCmdPushConstants(currentCommandBuffer, renderer->pipeline.layout,
+                       VK_SHADER_STAGE_VERTEX_BIT, 0,
+                       sizeof(mw_push_constants_data), &pushConstants);
 
     vkCmdDrawIndexed(currentCommandBuffer, mesh.indicesCount, 1,
                      mesh.indicesOffset, mesh.verticesOffset, 0);
