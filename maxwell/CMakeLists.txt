@@ -7,12 +7,13 @@ add_subdirectory(core)
 add_subdirectory(gpu)
 add_subdirectory(application)
 add_subdirectory(renderer)
+add_subdirectory(engine)
 add_subdirectory(cglm)
 add_subdirectory(glfw)
 
 add_library(maxwell INTERFACE)
 target_link_libraries(maxwell INTERFACE
-    application
+    engine
     cglm
 )
 target_include_directories(maxwell INTERFACE

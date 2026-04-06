@@ -3,6 +3,6 @@
 
 #include <cglm/cglm.h>
 
-#include "mw_application.h"
+#include "mw_context.h"
 
 #endif

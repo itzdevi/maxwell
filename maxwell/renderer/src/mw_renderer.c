@@ -6,7 +6,6 @@
 #include <vulkan/vulkan.h>
 
 #include "commands/mw_draw_command.h"
-#include "core/mw_descriptor.h"
 #include "core/mw_renderer_def.h"
 #include "core/mw_surface.h"
 #include "renderer/mw_framebuffer.h"
@@ -57,15 +56,6 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
 
   mw_renderer_create_swapchain(renderer);
 
-  mw_renderer_create_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
-
-  mw_renderer_create_descriptor_set_layout(renderer, 0,
-                                           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                           VK_SHADER_STAGE_VERTEX_BIT);
-  mw_renderer_create_descriptor_pool(
-      renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, MAX_FRAMES_IN_FLIGHT);
-  mw_renderer_create_descriptor_sets(renderer, MAX_FRAMES_IN_FLIGHT);
-
   mw_renderer_create_pipeline(renderer);
   mw_renderer_create_framebuffers(renderer);
   renderer->transferCommand =
@@ -101,10 +91,6 @@ void mw_renderer_destroy(mw_renderer* renderer) {
                                    renderer->framebuffers);
   mw_renderer_destroy_pipeline(renderer);
   mw_renderer_destroy_swapchain(renderer);
-  mw_renderer_destroy_uniform_buffers(renderer, MAX_FRAMES_IN_FLIGHT);
-  mw_renderer_destroy_descriptor_pool(renderer);
-  mw_renderer_destroy_descriptor_set_layout(renderer);
-  mw_renderer_destroy_descriptor_sets(renderer);
 
   mw_renderer_destroy_surface(renderer->gpu.instance, renderer->surface);
 

@@ -8,20 +8,22 @@
 #include "mw_vertex_buffer.h"
 
 uint32_t mw_renderer_add_mesh(mw_renderer* renderer, mw_vertex* vertices,
-                              uint32_t verticesSize, uint32_t* indices,
-                              uint32_t indicesSize) {
+                              uint32_t verticesCount, uint32_t* indices,
+                              uint32_t indicesCount) {
   renderer->meshPool = realloc(
       renderer->meshPool, (renderer->meshCount + 1) * sizeof(mw_mesh_entry));
-  renderer->meshPool[renderer->meshCount] =
-      (mw_mesh_entry){.verticesCount = verticesSize / sizeof(mw_vertex),
-                      .indicesCount = indicesSize / sizeof(uint32_t)};
+  renderer->meshPool[renderer->meshCount] = (mw_mesh_entry){
+      .verticesCount = verticesCount, .indicesCount = indicesCount};
 
-  renderer->meshPool[renderer->meshCount].vertices = malloc(verticesSize);
-  renderer->meshPool[renderer->meshCount].indices = malloc(indicesSize);
+  renderer->meshPool[renderer->meshCount].vertices =
+      malloc(verticesCount * sizeof(mw_vertex));
+  renderer->meshPool[renderer->meshCount].indices =
+      malloc(indicesCount * sizeof(uint32_t));
 
   memcpy(renderer->meshPool[renderer->meshCount].vertices, vertices,
-         verticesSize);
-  memcpy(renderer->meshPool[renderer->meshCount].indices, indices, indicesSize);
+         verticesCount * sizeof(mw_vertex));
+  memcpy(renderer->meshPool[renderer->meshCount].indices, indices,
+         indicesCount * sizeof(uint32_t));
 
   return renderer->meshCount++;
 }

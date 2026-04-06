@@ -1,6 +1,8 @@
 #include <maxwell.h>
 
+void onLoad() { printf("hi\n"); }
+
 int main() {
-  mw_app_info info = {.title = "Sandbox", .size = {800, 600}};
-  mw_app_start(info);
+  mw_engine_info info = {};
+  mw_ctx* engine = mw_engine_init(info);
 }

@@ -174,8 +174,7 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {0};
   pipelineLayoutCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutCreateInfo.setLayoutCount = 1;
-  pipelineLayoutCreateInfo.pSetLayouts = &renderer->descriptorSetLayout;
+  pipelineLayoutCreateInfo.setLayoutCount = 0;
 
   VkPushConstantRange range = {0};
   range.offset = 0;

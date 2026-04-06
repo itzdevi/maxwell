@@ -11,6 +11,7 @@
 
 GLFWwindow* window;
 mw_renderer* renderer;
+double lastTime = 0;
 
 void mw_app_get_framebuffer_size(vec2 dest) {
   int width, height;
@@ -33,9 +34,9 @@ VkResult mw_app_create_surface(VkInstance instance, VkSurfaceKHR* surface) {
 }
 
 void mw_app_start(mw_app_info info) {
-  mw_vertex vertices[] = {{.position = {-0.5, 0.5, 0}},
-                          {.position = {0.0, -0.5, 0}},
-                          {.position = {0.5, 0.5, 0}}};
+  mw_vertex vertices[] = {{.position = {-0.5, -0.5, 0}},
+                          {.position = {0.0, 0.5, 0}},
+                          {.position = {0.5, -0.5, 0}}};
 
   uint32_t indices[] = {0, 1, 2};
 
@@ -58,36 +59,106 @@ void mw_app_start(mw_app_info info) {
 
   renderer = mw_renderer_initialize(rendererConfig);
 
-  uint32_t triangle = mw_renderer_add_mesh(renderer, vertices, sizeof(vertices),
-                                           indices, sizeof(indices));
+  cgltf_options options = {0};
+  cgltf_data* data;
+  MW_ASSERT(cgltf_parse_file(&options, "../assets/models/ABeautifulGame.glb",
+                             &data) == cgltf_result_success);
+  cgltf_load_buffers(&options, data, "../assets/models/ABeautifulGame.glb");
+
+  uint32_t modelCount = data->meshes_count;
+  uint32_t* models = malloc(sizeof(uint32_t) * modelCount);
+  for (size_t i = 0; i < data->meshes_count; i++) {
+    cgltf_mesh* mesh = &data->meshes[i];
+    for (size_t j = 0; j < mesh->primitives_count; j++) {
+      cgltf_primitive* prim = &mesh->primitives[j];
+
+      // load vertices
+      uint32_t vertexCount = prim[0].attributes->data->count;
+      mw_vertex* vertices = malloc(sizeof(mw_vertex) * vertexCount);
+      for (size_t k = 0; k < prim->attributes_count; k++) {
+        cgltf_attribute* attr = &prim->attributes[k];
+
+        if (attr->type == cgltf_attribute_type_position) {
+          for (size_t v = 0; v < vertexCount; v++) {
+            cgltf_accessor_read_float(attr->data, v, vertices[v].position, 3);
+          }
+        }
+
+        if (attr->type == cgltf_attribute_type_normal) {
+          for (size_t v = 0; v < vertexCount; v++) {
+            cgltf_accessor_read_float(attr->data, v, vertices[v].normal, 3);
+          }
+        }
+      }
+
+      // load indices
+      uint32_t indexCount = prim->indices->count;
+      uint32_t* indices = malloc(sizeof(uint32_t) * indexCount);
+      for (size_t v = 0; v < indexCount; v++) {
+        indices[v] = cgltf_accessor_read_index(prim->indices, v);
+      }
+
+      models[i] = mw_renderer_add_mesh(renderer, vertices, vertexCount, indices,
+                                       indexCount);
+      free(vertices);
+      free(indices);
+    }
+  }
+
+  if (info.onLoad) info.onLoad();
 
   mw_renderer_submit_meshes(renderer);
 
+  lastTime = glfwGetTime();
+  uint8_t frame;
+  float rot = 0;
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
+
+    double dt = glfwGetTime() - lastTime;
+    lastTime = glfwGetTime();
 
     vec2 fbSize;
     mw_app_get_framebuffer_size(fbSize);
     if (fbSize[0] == 0 || fbSize[1] == 0) glfwWaitEvents();
 
-    mat4 transform;
+    for (size_t i = 0; i < data->nodes_count; i++) {
+      cgltf_node* node = &data->nodes[i];
 
-    glm_mat4_identity(transform);
-    glm_translate(transform, (vec3){-1, 0, 0});
-    mw_render_pass renderPass = {.meshIndex = triangle};
-    glm_mat4_copy(transform, renderPass.transform);
-    mw_renderer_push_render_pass(renderer, renderPass);
+      uint32_t meshIndex = models[node->mesh - data->meshes];
+      float worldMat[16];
+      cgltf_node_transform_world(&data->nodes[i], worldMat);
+      mat4 model = {{worldMat[0], worldMat[1], worldMat[2], worldMat[3]},
+                    {worldMat[4], worldMat[5], worldMat[6], worldMat[7]},
+                    {worldMat[8], worldMat[9], worldMat[10], worldMat[11]},
+                    {worldMat[12], worldMat[13], worldMat[14], worldMat[15]}};
+      mat4 transMat;
+      glm_mat4_identity(transMat);
+      glm_translate(transMat, (vec3){0, -1, 0});
+      glm_rotate(transMat, rot, (vec3){0, 1, 0});
+      glm_scale(transMat, (vec3){4, 4, 4});
+      glm_mul(transMat, model, model);
+      mw_render_pass rp = {.meshIndex = meshIndex};
+      glm_mat4_copy(model, rp.transform);
+      mw_renderer_push_render_pass(renderer, rp);
+    }
 
-    glm_mat4_identity(transform);
-    glm_translate(transform, (vec3){1, 0, 0});
-    renderPass = (mw_render_pass){.meshIndex = triangle};
-    glm_mat4_copy(transform, renderPass.transform);
-    mw_renderer_push_render_pass(renderer, renderPass);
+    rot += dt;
+
+    // glm_mat4_identity(transform);
+    // glm_translate(transform, (vec3){1, 0, 0});
+    // renderPass = (mw_render_pass){.meshIndex = triangle};
+    // glm_mat4_copy(transform, renderPass.transform);
+    // mw_renderer_push_render_pass(renderer, renderPass);
 
     mw_renderer_draw_frame(renderer);
+    frame++;
   }
   mw_renderer_wait_for_idle(renderer);
   mw_renderer_destroy(renderer);
+
+  free(models);
+  cgltf_free(data);
 
   glfwDestroyWindow(window);
   glfwTerminate();
