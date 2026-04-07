@@ -16,18 +16,20 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   MW_ASSERT(vkBeginCommandBuffer(currentCommandBuffer,
                                  &commandBufferBeginInfo) == VK_SUCCESS);
 
+  VkClearValue clearValues[2];
+  clearValues[0].color = (VkClearColorValue){0.53, 0.81, 0.92, 1.0};
+  clearValues[1].depthStencil = (VkClearDepthStencilValue){1.0, 0.0};
+
   VkRenderPassBeginInfo renderPassBeginInfo = {0};
   renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   renderPassBeginInfo.renderPass = renderer->pipeline.renderPass;
   renderPassBeginInfo.framebuffer = renderer->framebuffers[imageIndex];
+  renderPassBeginInfo.clearValueCount = 2;
+  renderPassBeginInfo.pClearValues = clearValues;
 
   VkOffset2D offset = {0, 0};
   renderPassBeginInfo.renderArea.offset = offset;
   renderPassBeginInfo.renderArea.extent = renderer->swapchain.extent;
-
-  VkClearValue clearColor = {{{0, 0, 0, 1}}};
-  renderPassBeginInfo.clearValueCount = 1;
-  renderPassBeginInfo.pClearValues = &clearColor;
 
   vkCmdBeginRenderPass(currentCommandBuffer, &renderPassBeginInfo,
                        VK_SUBPASS_CONTENTS_INLINE);

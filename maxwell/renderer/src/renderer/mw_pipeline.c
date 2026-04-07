@@ -20,7 +20,8 @@ VkShaderModule mw_create_shader_module(VkDevice device, const char* code,
 }
 
 VkRenderPass mw_create_render_pass(VkDevice device,
-                                   VkFormat swapchainImageFormat) {
+                                   VkFormat swapchainImageFormat,
+                                   VkFormat swapchainDepthFormat) {
   VkAttachmentDescription colorAttachment = {0};
   colorAttachment.format = swapchainImageFormat;
   colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -31,19 +32,37 @@ VkRenderPass mw_create_render_pass(VkDevice device,
   colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+  VkAttachmentDescription depthAttachment = {0};
+  depthAttachment.format = swapchainDepthFormat;
+  depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+  depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+  depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  depthAttachment.finalLayout =
+      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
   VkAttachmentReference colorAttachmentRef = {0};
   colorAttachmentRef.attachment = 0;
   colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+  VkAttachmentReference depthAttachmentRef = {0};
+  depthAttachmentRef.attachment = 1;
+  depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   VkSubpassDescription subpass = {0};
   subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
   subpass.colorAttachmentCount = 1;
   subpass.pColorAttachments = &colorAttachmentRef;
+  subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+  VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
 
   VkRenderPassCreateInfo renderPassCreateInfo = {0};
   renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-  renderPassCreateInfo.attachmentCount = 1;
-  renderPassCreateInfo.pAttachments = &colorAttachment;
+  renderPassCreateInfo.attachmentCount = 2;
+  renderPassCreateInfo.pAttachments = attachments;
   renderPassCreateInfo.subpassCount = 1;
   renderPassCreateInfo.pSubpasses = &subpass;
 
@@ -68,7 +87,8 @@ VkRenderPass mw_create_render_pass(VkDevice device,
 void mw_renderer_create_pipeline(mw_renderer* renderer) {
   mw_pipeline pipeline;
   pipeline.renderPass = mw_create_render_pass(renderer->gpu.device.device,
-                                              renderer->swapchain.imageFormat);
+                                              renderer->swapchain.imageFormat,
+                                              renderer->swapchain.depthFormat);
 
   unsigned int vertSize = 0;
   unsigned int fragSize = 0;
@@ -188,6 +208,15 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
                                    &pipelineLayoutCreateInfo, NULL,
                                    &pipeline.layout) == VK_SUCCESS);
 
+  VkPipelineDepthStencilStateCreateInfo depthStencil = {0};
+  depthStencil.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  depthStencil.depthTestEnable = VK_TRUE;
+  depthStencil.depthWriteEnable = VK_TRUE;
+  depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+  depthStencil.depthBoundsTestEnable = VK_FALSE;
+  depthStencil.stencilTestEnable = VK_FALSE;
+
   VkGraphicsPipelineCreateInfo pipelineCreateInfo = {0};
   pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
   pipelineCreateInfo.stageCount = 2;
@@ -200,6 +229,7 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
   pipelineCreateInfo.pMultisampleState = &multisampling;
   pipelineCreateInfo.pColorBlendState = &colorBlending;
   pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+  pipelineCreateInfo.pDepthStencilState = &depthStencil;
 
   pipelineCreateInfo.layout = pipeline.layout;
   pipelineCreateInfo.renderPass = pipeline.renderPass;

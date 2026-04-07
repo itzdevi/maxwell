@@ -8,6 +8,7 @@
 
 #include "core/mw_renderer_def.h"
 #include "mw_framebuffer.h"
+#include "resources/mw_buffer.h"
 
 VkSurfaceFormatKHR mw_choose_swap_surface_format(
     VkSurfaceFormatKHR* availableFormats, unsigned int availableFormatsCount) {
@@ -148,6 +149,7 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
                           images);
 
   VkFormat imageFormat = surfaceFormat.format;
+  VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
   mw_swapchain sc;
   sc.swapchain = swapchain;
@@ -157,6 +159,55 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
   sc.extent = extent;
   sc.imageViews = mw_create_image_views(renderer->gpu.device.device,
                                         imageFormat, imageCount, images);
+
+  VkImageCreateInfo depthBufferCreateInfo = {0};
+  depthBufferCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  depthBufferCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+  depthBufferCreateInfo.format = depthFormat;
+  depthBufferCreateInfo.mipLevels = 1;
+  depthBufferCreateInfo.arrayLayers = 1;
+  depthBufferCreateInfo.extent.width = extent.width;
+  depthBufferCreateInfo.extent.height = extent.height;
+  depthBufferCreateInfo.extent.depth = 1;
+  depthBufferCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+  depthBufferCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  depthBufferCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+  depthBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  depthBufferCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+  vkCreateImage(renderer->gpu.device.device, &depthBufferCreateInfo, NULL,
+                &sc.depthImage);
+
+  VkMemoryRequirements memReq;
+  vkGetImageMemoryRequirements(renderer->gpu.device.device, sc.depthImage,
+                               &memReq);
+
+  VkMemoryAllocateInfo allocInfo = {0};
+  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize = memReq.size;
+  allocInfo.memoryTypeIndex = mw_renderer_find_memory_type(
+      renderer->gpu.physicalDevice, memReq.memoryTypeBits,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  vkAllocateMemory(renderer->gpu.device.device, &allocInfo, NULL,
+                   &sc.depthImageMemory);
+  vkBindImageMemory(renderer->gpu.device.device, sc.depthImage,
+                    sc.depthImageMemory, 0);
+
+  VkImageViewCreateInfo depthViewInfo = {0};
+  depthViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  depthViewInfo.image = sc.depthImage;
+  depthViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  depthViewInfo.format = depthFormat;
+  depthViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+  depthViewInfo.subresourceRange.baseMipLevel = 0;
+  depthViewInfo.subresourceRange.levelCount = 1;
+  depthViewInfo.subresourceRange.baseArrayLayer = 0;
+  depthViewInfo.subresourceRange.layerCount = 1;
+
+  vkCreateImageView(renderer->gpu.device.device, &depthViewInfo, NULL,
+                    &sc.depthImageView);
+
+  sc.depthFormat = depthFormat;
 
   mw_gpu_free_swapchain_support_details(details);
   renderer->swapchain = sc;
@@ -171,5 +222,12 @@ void mw_renderer_destroy_swapchain(mw_renderer* renderer) {
   for (size_t i = 0; i < renderer->swapchain.imageCount; i++)
     vkDestroyImageView(renderer->gpu.device.device,
                        renderer->swapchain.imageViews[i], NULL);
+
+  vkDestroyImage(renderer->gpu.device.device, renderer->swapchain.depthImage,
+                 NULL);
+  vkDestroyImageView(renderer->gpu.device.device,
+                     renderer->swapchain.depthImageView, NULL);
+  vkFreeMemory(renderer->gpu.device.device,
+               renderer->swapchain.depthImageMemory, NULL);
   free(renderer->swapchain.imageViews);
 }

@@ -63,7 +63,9 @@ void mw_app_start(mw_app_info info) {
   cgltf_data* data;
   MW_ASSERT(cgltf_parse_file(&options, "../assets/models/ABeautifulGame.glb",
                              &data) == cgltf_result_success);
-  cgltf_load_buffers(&options, data, "../assets/models/ABeautifulGame.glb");
+  MW_ASSERT(cgltf_load_buffers(&options, data,
+                               "../assets/models/ABeautifulGame.glb") ==
+            cgltf_result_success);
 
   uint32_t modelCount = data->meshes_count;
   uint32_t* models = malloc(sizeof(uint32_t) * modelCount);
@@ -111,7 +113,7 @@ void mw_app_start(mw_app_info info) {
 
   lastTime = glfwGetTime();
   uint8_t frame;
-  float rot = 0;
+  double rot = 0;
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
@@ -142,6 +144,17 @@ void mw_app_start(mw_app_info info) {
       glm_mat4_copy(model, rp.transform);
       mw_renderer_push_render_pass(renderer, rp);
     }
+
+    // mat4 transform;
+    // glm_mat4_identity(transform);
+    // glm_translate(transform, (vec3){0, -1, 0});
+    // glm_rotate(transform, rot, (vec3){0, 1, 0});
+    // glm_scale(transform, (vec3){10, 10, 10});
+    // glm_scale(transform, (vec3){0.1f, 0.1f, 0.1f});
+
+    // mw_render_pass rp = {.meshIndex = 0};
+    // glm_mat4_copy(transform, rp.transform);
+    // mw_renderer_push_render_pass(renderer, rp);
 
     rot += dt;
 

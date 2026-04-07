@@ -10,10 +10,14 @@
 typedef struct mw_swapchain {
   VkSwapchainKHR swapchain;
   unsigned int imageCount;
+  VkImageView* imageViews;
   VkImage* images;
   VkFormat imageFormat;
+  VkImageView depthImageView;
+  VkImage depthImage;
+  VkFormat depthFormat;
+  VkDeviceMemory depthImageMemory;
   VkExtent2D extent;
-  VkImageView* imageViews;
 } mw_swapchain;
 
 void mw_renderer_create_swapchain(mw_renderer* renderer);

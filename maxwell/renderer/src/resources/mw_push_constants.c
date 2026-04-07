@@ -9,15 +9,17 @@ mw_push_constants_data mw_renderer_get_push_constants(mw_renderer* renderer,
   mat4 proj;
   glm_perspective(45, ar, 0.1, 1000, proj);
 
+  vec4 viewPos = {0, 0, 3, 0};
   mat4 view;
   glm_mat4_identity(view);
-  glm_lookat((vec3){0, 0, 3}, (vec3){}, (vec3){0, -1, 0}, view);
+  glm_lookat(viewPos, (vec3){}, (vec3){0, -1, 0}, view);
 
   mat4 mvp;
   glm_mul(proj, view, mvp);
-  glm_mul(mvp, transform, mvp);
 
   mw_push_constants_data data = {0};
-  glm_mat4_copy(mvp, data.mvp);
+  glm_mat4_copy(transform, data.model);
+  glm_mat4_copy(mvp, data.vp);
+  glm_vec4_copy(viewPos, data.viewPos);
   return data;
 }

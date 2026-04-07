@@ -17,7 +17,6 @@ typedef struct mw_renderer {
   mw_swapchain swapchain;
   mw_pipeline pipeline;
   VkFramebuffer* framebuffers;
-  VkImage depthBuffer;
   mw_command drawCommand;
   mw_command transferCommand;
   mw_sync_objects syncObjects;

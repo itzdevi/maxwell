@@ -4,8 +4,9 @@
 
 #include "core/mw_renderer_def.h"
 
-uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter,
-                          VkMemoryPropertyFlags properties) {
+uint32_t mw_renderer_find_memory_type(VkPhysicalDevice device,
+                                      uint32_t typeFilter,
+                                      VkMemoryPropertyFlags properties) {
   VkPhysicalDeviceMemoryProperties memoryProperties;
   vkGetPhysicalDeviceMemoryProperties(device, &memoryProperties);
 
@@ -40,9 +41,9 @@ mw_buffer mw_renderer_create_buffer(mw_renderer* renderer, uint32_t count,
   VkMemoryAllocateInfo allocInfo = {0};
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memoryRequirements.size;
-  allocInfo.memoryTypeIndex =
-      find_memory_type(renderer->gpu.physicalDevice,
-                       memoryRequirements.memoryTypeBits, properties);
+  allocInfo.memoryTypeIndex = mw_renderer_find_memory_type(
+      renderer->gpu.physicalDevice, memoryRequirements.memoryTypeBits,
+      properties);
 
   VkDeviceMemory memory;
   MW_ASSERT(vkAllocateMemory(renderer->gpu.device.device, &allocInfo, NULL,

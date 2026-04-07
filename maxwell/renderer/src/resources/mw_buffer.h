@@ -13,6 +13,9 @@ typedef struct mw_buffer {
   size_t stride;
 } mw_buffer;
 
+uint32_t mw_renderer_find_memory_type(VkPhysicalDevice device,
+                                      uint32_t typeFilter,
+                                      VkMemoryPropertyFlags properties);
 mw_buffer mw_renderer_create_buffer(mw_renderer* renderer, uint32_t count,
                                     uint32_t stride, VkBufferUsageFlags usage,
                                     VkMemoryPropertyFlags properties);

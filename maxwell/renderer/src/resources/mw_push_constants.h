@@ -6,7 +6,9 @@
 #include "mw_renderer.h"
 
 typedef struct mw_push_constants_data {
-  mat4 mvp;
+  mat4 model;
+  mat4 vp;
+  vec4 viewPos;
 } mw_push_constants_data;
 
 mw_push_constants_data mw_renderer_get_push_constants(mw_renderer* renderer,

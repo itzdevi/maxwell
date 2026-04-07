@@ -9,12 +9,13 @@ void mw_renderer_create_framebuffers(mw_renderer* renderer) {
       malloc(renderer->swapchain.imageCount * sizeof(VkFramebuffer));
 
   for (size_t i = 0; i < renderer->swapchain.imageCount; i++) {
-    VkImageView attachments[] = {renderer->swapchain.imageViews[i]};
+    VkImageView attachments[] = {renderer->swapchain.imageViews[i],
+                                 renderer->swapchain.depthImageView};
 
     VkFramebufferCreateInfo framebufferCreateInfo = {0};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferCreateInfo.renderPass = renderer->pipeline.renderPass;
-    framebufferCreateInfo.attachmentCount = 1;
+    framebufferCreateInfo.attachmentCount = 2;
     framebufferCreateInfo.pAttachments = attachments;
     framebufferCreateInfo.width = renderer->swapchain.extent.width;
     framebufferCreateInfo.height = renderer->swapchain.extent.height;
