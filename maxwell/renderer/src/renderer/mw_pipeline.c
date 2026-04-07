@@ -86,9 +86,9 @@ VkRenderPass mw_create_render_pass(VkDevice device,
 
 void mw_renderer_create_pipeline(mw_renderer* renderer) {
   mw_pipeline pipeline;
-  pipeline.renderPass = mw_create_render_pass(renderer->gpu.device.device,
-                                              renderer->swapchain.imageFormat,
-                                              renderer->swapchain.depthFormat);
+  pipeline.render_pass = mw_create_render_pass(renderer->gpu.device.device,
+                                              renderer->swapchain.image_format,
+                                              renderer->swapchain.depth_format);
 
   unsigned int vertSize = 0;
   unsigned int fragSize = 0;
@@ -232,7 +232,7 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
   pipelineCreateInfo.pDepthStencilState = &depthStencil;
 
   pipelineCreateInfo.layout = pipeline.layout;
-  pipelineCreateInfo.renderPass = pipeline.renderPass;
+  pipelineCreateInfo.renderPass = pipeline.render_pass;
   pipelineCreateInfo.subpass = 0;
 
   MW_ASSERT(vkCreateGraphicsPipelines(renderer->gpu.device.device,
@@ -254,5 +254,5 @@ void mw_renderer_destroy_pipeline(mw_renderer* renderer) {
   vkDestroyPipelineLayout(renderer->gpu.device.device,
                           renderer->pipeline.layout, NULL);
   vkDestroyRenderPass(renderer->gpu.device.device,
-                      renderer->pipeline.renderPass, NULL);
+                      renderer->pipeline.render_pass, NULL);
 }

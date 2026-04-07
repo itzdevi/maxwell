@@ -5,11 +5,11 @@
 #include <vulkan/vulkan.h>
 
 typedef struct mw_sync_objects {
-  VkFence* frameFences;
-  VkSemaphore* acquireSemaphores;
-  VkSemaphore* submitSemaphores;
-  uint8_t framesInFlight;
-  uint8_t swapchainImages;
+  VkFence* frame_fences;
+  VkSemaphore* acquire_semaphores;
+  VkSemaphore* submit_semaphores;
+  uint8_t frames_in_flight;
+  uint8_t swapchain_images;
 } mw_sync_objects;
 
 mw_sync_objects mw_renderer_create_sync_objects(

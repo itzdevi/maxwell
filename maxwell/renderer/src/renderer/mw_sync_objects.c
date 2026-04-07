@@ -6,14 +6,14 @@ mw_sync_objects mw_renderer_create_sync_objects(
     mw_device device, const unsigned int maxFramesInFlight,
     const unsigned int swapchainImageCount) {
   mw_sync_objects syncObjects;
-  syncObjects.framesInFlight = maxFramesInFlight;
-  syncObjects.swapchainImages = swapchainImageCount;
+  syncObjects.frames_in_flight = maxFramesInFlight;
+  syncObjects.swapchain_images = swapchainImageCount;
 
-  syncObjects.acquireSemaphores =
+  syncObjects.acquire_semaphores =
       malloc(maxFramesInFlight * sizeof(VkSemaphore));
-  syncObjects.submitSemaphores =
+  syncObjects.submit_semaphores =
       malloc(swapchainImageCount * sizeof(VkSemaphore));
-  syncObjects.frameFences = malloc(maxFramesInFlight * sizeof(VkFence));
+  syncObjects.frame_fences = malloc(maxFramesInFlight * sizeof(VkFence));
 
   VkSemaphoreCreateInfo semaphoreCreateInfo = {0};
   semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -25,14 +25,14 @@ mw_sync_objects mw_renderer_create_sync_objects(
   for (size_t i = 0; i < maxFramesInFlight || i < swapchainImageCount; i++) {
     if (i < swapchainImageCount)
       MW_ASSERT(vkCreateSemaphore(device.device, &semaphoreCreateInfo, NULL,
-                                  syncObjects.submitSemaphores + i) ==
+                                  syncObjects.submit_semaphores + i) ==
                 VK_SUCCESS);
     if (i < maxFramesInFlight)
       MW_ASSERT(vkCreateSemaphore(device.device, &semaphoreCreateInfo, NULL,
-                                  syncObjects.acquireSemaphores + i) ==
+                                  syncObjects.acquire_semaphores + i) ==
                     VK_SUCCESS &&
                 vkCreateFence(device.device, &fenceCreateInfo, NULL,
-                              syncObjects.frameFences + i) == VK_SUCCESS);
+                              syncObjects.frame_fences + i) == VK_SUCCESS);
   }
 
   return syncObjects;
@@ -41,16 +41,18 @@ mw_sync_objects mw_renderer_create_sync_objects(
 void mw_renderer_destroy_sync_objects(mw_device device,
                                       mw_sync_objects syncObjects) {
   for (size_t i = 0;
-       i < syncObjects.framesInFlight || i < syncObjects.swapchainImages; i++) {
-    if (i < syncObjects.swapchainImages)
-      vkDestroySemaphore(device.device, syncObjects.submitSemaphores[i], NULL);
-    if (i < syncObjects.framesInFlight) {
-      vkDestroySemaphore(device.device, syncObjects.acquireSemaphores[i], NULL);
-      vkDestroyFence(device.device, syncObjects.frameFences[i], NULL);
+       i < syncObjects.frames_in_flight || i < syncObjects.swapchain_images;
+       i++) {
+    if (i < syncObjects.swapchain_images)
+      vkDestroySemaphore(device.device, syncObjects.submit_semaphores[i], NULL);
+    if (i < syncObjects.frames_in_flight) {
+      vkDestroySemaphore(device.device, syncObjects.acquire_semaphores[i],
+                         NULL);
+      vkDestroyFence(device.device, syncObjects.frame_fences[i], NULL);
     }
   }
 
-  free(syncObjects.submitSemaphores);
-  free(syncObjects.acquireSemaphores);
-  free(syncObjects.frameFences);
+  free(syncObjects.submit_semaphores);
+  free(syncObjects.acquire_semaphores);
+  free(syncObjects.frame_fences);
 }

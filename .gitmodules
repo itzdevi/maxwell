@@ -4,3 +4,6 @@
 [submodule "maxwell/glfw"]
 	path = maxwell/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "maxwell/flecs"]
+	path = maxwell/flecs
+	url = https://github.com/SanderMertens/flecs.git

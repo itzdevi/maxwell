@@ -86,7 +86,7 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
   VkPresentModeKHR presentMode = mw_choose_swap_present_mode(
       details.presentModes, details.presentModesCount);
   VkExtent2D extent =
-      mw_choose_swap_extent(details.capabilities, renderer->framebufferSize);
+      mw_choose_swap_extent(details.capabilities, renderer->framebuffer_size);
 
   unsigned int imageCount = details.capabilities.minImageCount + 1;
   if (details.capabilities.maxImageCount > 0 &&
@@ -153,12 +153,12 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
 
   mw_swapchain sc;
   sc.swapchain = swapchain;
-  sc.imageCount = imageCount;
+  sc.image_count = imageCount;
   sc.images = images;
-  sc.imageFormat = imageFormat;
+  sc.image_format = imageFormat;
   sc.extent = extent;
-  sc.imageViews = mw_create_image_views(renderer->gpu.device.device,
-                                        imageFormat, imageCount, images);
+  sc.image_views = mw_create_image_views(renderer->gpu.device.device,
+                                         imageFormat, imageCount, images);
 
   VkImageCreateInfo depthBufferCreateInfo = {0};
   depthBufferCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -176,10 +176,10 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
   depthBufferCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
   vkCreateImage(renderer->gpu.device.device, &depthBufferCreateInfo, NULL,
-                &sc.depthImage);
+                &sc.depth_image);
 
   VkMemoryRequirements memReq;
-  vkGetImageMemoryRequirements(renderer->gpu.device.device, sc.depthImage,
+  vkGetImageMemoryRequirements(renderer->gpu.device.device, sc.depth_image,
                                &memReq);
 
   VkMemoryAllocateInfo allocInfo = {0};
@@ -189,13 +189,13 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
       renderer->gpu.physicalDevice, memReq.memoryTypeBits,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   vkAllocateMemory(renderer->gpu.device.device, &allocInfo, NULL,
-                   &sc.depthImageMemory);
-  vkBindImageMemory(renderer->gpu.device.device, sc.depthImage,
-                    sc.depthImageMemory, 0);
+                   &sc.depth_image_memory);
+  vkBindImageMemory(renderer->gpu.device.device, sc.depth_image,
+                    sc.depth_image_memory, 0);
 
   VkImageViewCreateInfo depthViewInfo = {0};
   depthViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  depthViewInfo.image = sc.depthImage;
+  depthViewInfo.image = sc.depth_image;
   depthViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
   depthViewInfo.format = depthFormat;
   depthViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -205,9 +205,9 @@ void mw_renderer_create_swapchain(mw_renderer* renderer) {
   depthViewInfo.subresourceRange.layerCount = 1;
 
   vkCreateImageView(renderer->gpu.device.device, &depthViewInfo, NULL,
-                    &sc.depthImageView);
+                    &sc.depth_image_view);
 
-  sc.depthFormat = depthFormat;
+  sc.depth_format = depthFormat;
 
   mw_gpu_free_swapchain_support_details(details);
   renderer->swapchain = sc;
@@ -219,15 +219,15 @@ void mw_renderer_destroy_swapchain(mw_renderer* renderer) {
 
   free(renderer->swapchain.images);
 
-  for (size_t i = 0; i < renderer->swapchain.imageCount; i++)
+  for (size_t i = 0; i < renderer->swapchain.image_count; i++)
     vkDestroyImageView(renderer->gpu.device.device,
-                       renderer->swapchain.imageViews[i], NULL);
+                       renderer->swapchain.image_views[i], NULL);
 
-  vkDestroyImage(renderer->gpu.device.device, renderer->swapchain.depthImage,
+  vkDestroyImage(renderer->gpu.device.device, renderer->swapchain.depth_image,
                  NULL);
   vkDestroyImageView(renderer->gpu.device.device,
-                     renderer->swapchain.depthImageView, NULL);
+                     renderer->swapchain.depth_image_view, NULL);
   vkFreeMemory(renderer->gpu.device.device,
-               renderer->swapchain.depthImageMemory, NULL);
-  free(renderer->swapchain.imageViews);
+               renderer->swapchain.depth_image_memory, NULL);
+  free(renderer->swapchain.image_views);
 }

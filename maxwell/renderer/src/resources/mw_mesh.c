@@ -10,49 +10,49 @@
 uint32_t mw_renderer_add_mesh(mw_renderer* renderer, mw_vertex* vertices,
                               uint32_t verticesCount, uint32_t* indices,
                               uint32_t indicesCount) {
-  renderer->meshPool = realloc(
-      renderer->meshPool, (renderer->meshCount + 1) * sizeof(mw_mesh_entry));
-  renderer->meshPool[renderer->meshCount] = (mw_mesh_entry){
-      .verticesCount = verticesCount, .indicesCount = indicesCount};
+  renderer->mesh_pool = realloc(
+      renderer->mesh_pool, (renderer->mesh_count + 1) * sizeof(mw_mesh_entry));
+  renderer->mesh_pool[renderer->mesh_count] = (mw_mesh_entry){
+      .vertices_count = verticesCount, .indices_count = indicesCount};
 
-  renderer->meshPool[renderer->meshCount].vertices =
+  renderer->mesh_pool[renderer->mesh_count].vertices =
       malloc(verticesCount * sizeof(mw_vertex));
-  renderer->meshPool[renderer->meshCount].indices =
+  renderer->mesh_pool[renderer->mesh_count].indices =
       malloc(indicesCount * sizeof(uint32_t));
 
-  memcpy(renderer->meshPool[renderer->meshCount].vertices, vertices,
+  memcpy(renderer->mesh_pool[renderer->mesh_count].vertices, vertices,
          verticesCount * sizeof(mw_vertex));
-  memcpy(renderer->meshPool[renderer->meshCount].indices, indices,
+  memcpy(renderer->mesh_pool[renderer->mesh_count].indices, indices,
          indicesCount * sizeof(uint32_t));
 
-  return renderer->meshCount++;
+  return renderer->mesh_count++;
 }
 
 void mw_renderer_destroy_mesh_pool(mw_renderer* renderer) {
-  for (size_t i = 0; i < renderer->meshCount; i++) {
-    free(renderer->meshPool[i].vertices);
-    free(renderer->meshPool[i].indices);
+  for (size_t i = 0; i < renderer->mesh_count; i++) {
+    free(renderer->mesh_pool[i].vertices);
+    free(renderer->mesh_pool[i].indices);
   }
 
-  free(renderer->meshPool);
+  free(renderer->mesh_pool);
 }
 
 void mw_renderer_create_meshes(mw_renderer* renderer) {
-  if (renderer->meshCount == 0) return;
+  if (renderer->mesh_count == 0) return;
 
-  renderer->meshes = malloc(renderer->meshCount * sizeof(mw_mesh));
+  renderer->meshes = malloc(renderer->mesh_count * sizeof(mw_mesh));
 
   uint32_t vertexOffset = 0;
   uint32_t indexOffset = 0;
 
-  for (size_t i = 0; i < renderer->meshCount; i++) {
-    uint32_t verticesCount = renderer->meshPool[i].verticesCount;
-    uint32_t indicesCount = renderer->meshPool[i].indicesCount;
+  for (size_t i = 0; i < renderer->mesh_count; i++) {
+    uint32_t verticesCount = renderer->mesh_pool[i].vertices_count;
+    uint32_t indicesCount = renderer->mesh_pool[i].indices_count;
 
-    mw_mesh mesh = {.verticesOffset = vertexOffset,
-                    .verticesCount = verticesCount,
-                    .indicesOffset = indexOffset,
-                    .indicesCount = indicesCount};
+    mw_mesh mesh = {.vertices_offset = vertexOffset,
+                    .vertices_count = verticesCount,
+                    .indices_offset = indexOffset,
+                    .indices_count = indicesCount};
     renderer->meshes[i] = mesh;
 
     vertexOffset += verticesCount;
@@ -63,35 +63,35 @@ void mw_renderer_create_meshes(mw_renderer* renderer) {
 }
 
 void mw_renderer_destroy_meshes(mw_renderer* renderer) {
-  mw_renderer_destroy_buffer(renderer, renderer->vertexBuffer);
-  mw_renderer_destroy_buffer(renderer, renderer->indexBuffer);
+  mw_renderer_destroy_buffer(renderer, renderer->vertex_buffer);
+  mw_renderer_destroy_buffer(renderer, renderer->index_buffer);
   free(renderer->meshes);
 }
 
 void mw_renderer_create_mesh_buffers(mw_renderer* renderer) {
-  mw_mesh lastMesh = renderer->meshes[renderer->meshCount - 1];
-  uint32_t totalVerts = lastMesh.verticesOffset + lastMesh.verticesCount;
-  uint32_t totalIdx = lastMesh.indicesOffset + lastMesh.indicesCount;
+  mw_mesh lastMesh = renderer->meshes[renderer->mesh_count - 1];
+  uint32_t totalVerts = lastMesh.vertices_offset + lastMesh.vertices_count;
+  uint32_t totalIdx = lastMesh.indices_offset + lastMesh.indices_count;
 
   mw_vertex* flatVertices = malloc(totalVerts * sizeof(mw_vertex));
   uint32_t* flatIndices = malloc(totalIdx * sizeof(uint32_t));
 
   uint32_t idxVertices = 0;
   uint32_t idxIndices = 0;
-  for (size_t i = 0; i < renderer->meshCount; i++) {
-    for (size_t j = 0; j < renderer->meshes[i].verticesCount; j++) {
-      flatVertices[idxVertices++] = renderer->meshPool[i].vertices[j];
+  for (size_t i = 0; i < renderer->mesh_count; i++) {
+    for (size_t j = 0; j < renderer->meshes[i].vertices_count; j++) {
+      flatVertices[idxVertices++] = renderer->mesh_pool[i].vertices[j];
     }
 
-    for (size_t j = 0; j < renderer->meshes[i].indicesCount; j++) {
-      flatIndices[idxIndices++] = renderer->meshPool[i].indices[j];
+    for (size_t j = 0; j < renderer->meshes[i].indices_count; j++) {
+      flatIndices[idxIndices++] = renderer->mesh_pool[i].indices[j];
     }
   }
 
   void* p;
-  renderer->vertexBuffer =
+  renderer->vertex_buffer =
       mw_renderer_create_vertex_buffer(renderer, flatVertices, totalVerts, p);
-  renderer->indexBuffer =
+  renderer->index_buffer =
       mw_renderer_create_index_buffer(renderer, flatIndices, totalIdx, p);
 
   free(flatVertices);

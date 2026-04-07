@@ -6,15 +6,15 @@
 
 void mw_renderer_create_framebuffers(mw_renderer* renderer) {
   VkFramebuffer* framebuffers =
-      malloc(renderer->swapchain.imageCount * sizeof(VkFramebuffer));
+      malloc(renderer->swapchain.image_count * sizeof(VkFramebuffer));
 
-  for (size_t i = 0; i < renderer->swapchain.imageCount; i++) {
-    VkImageView attachments[] = {renderer->swapchain.imageViews[i],
-                                 renderer->swapchain.depthImageView};
+  for (size_t i = 0; i < renderer->swapchain.image_count; i++) {
+    VkImageView attachments[] = {renderer->swapchain.image_views[i],
+                                 renderer->swapchain.depth_image_view};
 
     VkFramebufferCreateInfo framebufferCreateInfo = {0};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCreateInfo.renderPass = renderer->pipeline.renderPass;
+    framebufferCreateInfo.renderPass = renderer->pipeline.render_pass;
     framebufferCreateInfo.attachmentCount = 2;
     framebufferCreateInfo.pAttachments = attachments;
     framebufferCreateInfo.width = renderer->swapchain.extent.width;
@@ -31,7 +31,7 @@ void mw_renderer_create_framebuffers(mw_renderer* renderer) {
 
 void mw_renderer_destroy_framebuffers(mw_device device, mw_swapchain swapchain,
                                       VkFramebuffer* framebuffers) {
-  for (size_t i = 0; i < swapchain.imageCount; i++)
+  for (size_t i = 0; i < swapchain.image_count; i++)
     vkDestroyFramebuffer(device.device, framebuffers[i], NULL);
 
   free(framebuffers);

@@ -9,14 +9,14 @@
 
 typedef struct mw_swapchain {
   VkSwapchainKHR swapchain;
-  unsigned int imageCount;
-  VkImageView* imageViews;
+  unsigned int image_count;
+  VkImageView* image_views;
   VkImage* images;
-  VkFormat imageFormat;
-  VkImageView depthImageView;
-  VkImage depthImage;
-  VkFormat depthFormat;
-  VkDeviceMemory depthImageMemory;
+  VkFormat image_format;
+  VkImageView depth_image_view;
+  VkImage depth_image;
+  VkFormat depth_format;
+  VkDeviceMemory depth_image_memory;
   VkExtent2D extent;
 } mw_swapchain;
 

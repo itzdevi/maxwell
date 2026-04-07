@@ -11,7 +11,7 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   VkCommandBufferBeginInfo commandBufferBeginInfo = {0};
   commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   VkCommandBuffer currentCommandBuffer =
-      renderer->drawCommand.buffers[renderer->currentFrame];
+      renderer->draw_command.buffers[renderer->current_frame];
 
   MW_ASSERT(vkBeginCommandBuffer(currentCommandBuffer,
                                  &commandBufferBeginInfo) == VK_SUCCESS);
@@ -22,7 +22,7 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
 
   VkRenderPassBeginInfo renderPassBeginInfo = {0};
   renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  renderPassBeginInfo.renderPass = renderer->pipeline.renderPass;
+  renderPassBeginInfo.renderPass = renderer->pipeline.render_pass;
   renderPassBeginInfo.framebuffer = renderer->framebuffers[imageIndex];
   renderPassBeginInfo.clearValueCount = 2;
   renderPassBeginInfo.pClearValues = clearValues;
@@ -50,15 +50,15 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   scissor.extent = renderer->swapchain.extent;
   vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
 
-  VkBuffer buffers[] = {renderer->vertexBuffer.buffer};
+  VkBuffer buffers[] = {renderer->vertex_buffer.buffer};
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, buffers, offsets);
-  vkCmdBindIndexBuffer(currentCommandBuffer, renderer->indexBuffer.buffer, 0,
+  vkCmdBindIndexBuffer(currentCommandBuffer, renderer->index_buffer.buffer, 0,
                        VK_INDEX_TYPE_UINT32);
 
   mw_render_pass renderPass;
   while (mw_renderer_pop_render_pass(renderer, &renderPass)) {
-    mw_mesh mesh = renderer->meshes[renderPass.meshIndex];
+    mw_mesh mesh = renderer->meshes[renderPass.mesh_index];
 
     mw_push_constants_data pushConstants =
         mw_renderer_get_push_constants(renderer, renderPass.transform);
@@ -66,8 +66,8 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
                        VK_SHADER_STAGE_VERTEX_BIT, 0,
                        sizeof(mw_push_constants_data), &pushConstants);
 
-    vkCmdDrawIndexed(currentCommandBuffer, mesh.indicesCount, 1,
-                     mesh.indicesOffset, mesh.verticesOffset, 0);
+    vkCmdDrawIndexed(currentCommandBuffer, mesh.indices_count, 1,
+                     mesh.indices_offset, mesh.vertices_offset, 0);
   }
 
   vkCmdEndRenderPass(currentCommandBuffer);

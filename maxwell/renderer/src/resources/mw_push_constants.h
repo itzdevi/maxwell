@@ -8,7 +8,7 @@
 typedef struct mw_push_constants_data {
   mat4 model;
   mat4 vp;
-  vec4 viewPos;
+  vec4 view_pos;
 } mw_push_constants_data;
 
 mw_push_constants_data mw_renderer_get_push_constants(mw_renderer* renderer,

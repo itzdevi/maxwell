@@ -52,10 +52,10 @@ void mw_app_start(mw_app_info info) {
   const char** extensions = mw_get_extensions(&extensionsCount);
   mw_renderer_config rendererConfig = {
       .title = info.title,
-      .extensionCount = extensionsCount,
+      .extension_count = extensionsCount,
       .extensions = extensions,
-      .surfaceCreator = &mw_app_create_surface};
-  glm_vec2_copy(info.size, rendererConfig.framebufferSize);
+      .surface_creator = &mw_app_create_surface};
+  glm_vec2_copy(info.size, rendererConfig.framebuffer_size);
 
   renderer = mw_renderer_initialize(rendererConfig);
 
@@ -107,7 +107,7 @@ void mw_app_start(mw_app_info info) {
     }
   }
 
-  if (info.onLoad) info.onLoad();
+  if (info.on_load) info.on_load();
 
   mw_renderer_submit_meshes(renderer);
 
@@ -140,7 +140,7 @@ void mw_app_start(mw_app_info info) {
       glm_rotate(transMat, rot, (vec3){0, 1, 0});
       glm_scale(transMat, (vec3){4, 4, 4});
       glm_mul(transMat, model, model);
-      mw_render_pass rp = {.meshIndex = meshIndex};
+      mw_render_pass rp = {.mesh_index = meshIndex};
       glm_mat4_copy(model, rp.transform);
       mw_renderer_push_render_pass(renderer, rp);
     }

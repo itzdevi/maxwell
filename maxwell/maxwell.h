@@ -2,7 +2,6 @@
 #define MW_MAXWELL_H
 
 #include <cglm/cglm.h>
-
-#include "mw_context.h"
+#include <mw_engine.h>
 
 #endif

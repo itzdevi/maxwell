@@ -65,28 +65,28 @@ void mw_renderer_copy_buffer(mw_renderer* renderer, mw_buffer srcBuffer,
   VkCommandBufferAllocateInfo allocInfo = {0};
   allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  allocInfo.commandPool = renderer->transferCommand.pool;
+  allocInfo.commandPool = renderer->transfer_command.pool;
   allocInfo.commandBufferCount = 1;
 
   VkCommandBufferBeginInfo beginInfo = {0};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-  vkBeginCommandBuffer(renderer->transferCommand.buffers[0], &beginInfo);
+  vkBeginCommandBuffer(renderer->transfer_command.buffers[0], &beginInfo);
 
   VkBufferCopy copyRegion = {0};
   copyRegion.srcOffset = 0;
   copyRegion.dstOffset = 0;
   copyRegion.size = dstBuffer.size;
-  vkCmdCopyBuffer(renderer->transferCommand.buffers[0], srcBuffer.buffer,
+  vkCmdCopyBuffer(renderer->transfer_command.buffers[0], srcBuffer.buffer,
                   dstBuffer.buffer, 1, &copyRegion);
 
-  vkEndCommandBuffer(renderer->transferCommand.buffers[0]);
+  vkEndCommandBuffer(renderer->transfer_command.buffers[0]);
 
   VkSubmitInfo submitInfo = {0};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &renderer->transferCommand.buffers[0];
+  submitInfo.pCommandBuffers = &renderer->transfer_command.buffers[0];
 
   vkQueueSubmit(renderer->gpu.device.transferQueue, 1, &submitInfo,
                 VK_NULL_HANDLE);

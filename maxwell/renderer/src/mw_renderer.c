@@ -22,8 +22,9 @@ const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
 void mw_recreate_swapchain(mw_renderer* renderer) {
   vkDeviceWaitIdle(renderer->gpu.device.device);
 
-  mw_gpu_destroy_command(renderer->gpu.device, renderer->drawCommand);
-  mw_renderer_destroy_sync_objects(renderer->gpu.device, renderer->syncObjects);
+  mw_gpu_destroy_command(renderer->gpu.device, renderer->draw_command);
+  mw_renderer_destroy_sync_objects(renderer->gpu.device,
+                                   renderer->sync_objects);
   mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
                                    renderer->framebuffers);
   mw_renderer_destroy_pipeline(renderer);
@@ -31,24 +32,24 @@ void mw_recreate_swapchain(mw_renderer* renderer) {
   mw_renderer_create_swapchain(renderer);
   mw_renderer_create_pipeline(renderer);
   mw_renderer_create_framebuffers(renderer);
-  renderer->drawCommand =
+  renderer->draw_command =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
-  renderer->syncObjects = mw_renderer_create_sync_objects(
+  renderer->sync_objects = mw_renderer_create_sync_objects(
       renderer->gpu.device, MAX_FRAMES_IN_FLIGHT,
-      renderer->swapchain.imageCount);
+      renderer->swapchain.image_count);
 }
 
 mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
   mw_renderer* renderer = calloc(1, sizeof(mw_renderer));
-  renderer->framebufferResized = 0;
-  renderer->currentFrame = 0;
+  renderer->framebuffer_resized = 0;
+  renderer->current_frame = 0;
 
-  glm_vec2_copy(config.framebufferSize, renderer->framebufferSize);
+  glm_vec2_copy(config.framebuffer_size, renderer->framebuffer_size);
 
   mw_gpu_config gpuConfig = {.title = config.title,
                              .ext = config.extensions,
-                             .extCount = config.extensionCount};
+                             .extCount = config.extension_count};
   VkInstance instance = mw_gpu_create_instance(gpuConfig);
   renderer->surface = mw_renderer_create_surface(config, instance);
   gpuConfig.surface = renderer->surface;
@@ -58,14 +59,14 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
 
   mw_renderer_create_pipeline(renderer);
   mw_renderer_create_framebuffers(renderer);
-  renderer->transferCommand =
+  renderer->transfer_command =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, 1, TRANSFER);
-  renderer->syncObjects = mw_renderer_create_sync_objects(
+  renderer->sync_objects = mw_renderer_create_sync_objects(
       renderer->gpu.device, MAX_FRAMES_IN_FLIGHT,
-      renderer->swapchain.imageCount);
+      renderer->swapchain.image_count);
 
-  renderer->drawCommand =
+  renderer->draw_command =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
 
@@ -84,9 +85,10 @@ void mw_renderer_destroy(mw_renderer* renderer) {
   mw_renderer_destroy_meshes(renderer);
   mw_renderer_destroy_render_pages(renderer);
 
-  mw_renderer_destroy_sync_objects(renderer->gpu.device, renderer->syncObjects);
-  mw_gpu_destroy_command(renderer->gpu.device, renderer->drawCommand);
-  mw_gpu_destroy_command(renderer->gpu.device, renderer->transferCommand);
+  mw_renderer_destroy_sync_objects(renderer->gpu.device,
+                                   renderer->sync_objects);
+  mw_gpu_destroy_command(renderer->gpu.device, renderer->draw_command);
+  mw_gpu_destroy_command(renderer->gpu.device, renderer->transfer_command);
   mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
                                    renderer->framebuffers);
   mw_renderer_destroy_pipeline(renderer);
@@ -101,13 +103,13 @@ void mw_renderer_destroy(mw_renderer* renderer) {
 
 void mw_renderer_draw_frame(mw_renderer* renderer) {
   VkFence frameFence =
-      renderer->syncObjects.frameFences[renderer->currentFrame];
+      renderer->sync_objects.frame_fences[renderer->current_frame];
   vkWaitForFences(renderer->gpu.device.device, 1, &frameFence, VK_TRUE,
                   UINT64_MAX);
 
   unsigned int imageIndex;
   VkSemaphore acquireSemaphore =
-      renderer->syncObjects.acquireSemaphores[renderer->currentFrame];
+      renderer->sync_objects.acquire_semaphores[renderer->current_frame];
   VkResult result = vkAcquireNextImageKHR(
       renderer->gpu.device.device, renderer->swapchain.swapchain, UINT64_MAX,
       acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
@@ -120,9 +122,9 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   vkResetFences(renderer->gpu.device.device, 1, &frameFence);
 
   VkSemaphore submitSemaphore =
-      renderer->syncObjects.submitSemaphores[imageIndex];
+      renderer->sync_objects.submit_semaphores[imageIndex];
 
-  vkResetCommandBuffer(renderer->drawCommand.buffers[renderer->currentFrame],
+  vkResetCommandBuffer(renderer->draw_command.buffers[renderer->current_frame],
                        0);
   mw_renderer_record_draw_command_buffer(renderer, imageIndex);
 
@@ -130,7 +132,7 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers =
-      &renderer->drawCommand.buffers[renderer->currentFrame];
+      &renderer->draw_command.buffers[renderer->current_frame];
   submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = &acquireSemaphore;
   submitInfo.signalSemaphoreCount = 1;
@@ -153,16 +155,17 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
 
   result = vkQueuePresentKHR(renderer->gpu.device.presentQueue, &presentInfo);
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-      renderer->framebufferResized) {
-    renderer->framebufferResized = 0;
+      renderer->framebuffer_resized) {
+    renderer->framebuffer_resized = 0;
   } else {
-    if (!renderer->framebufferResized) {
+    if (!renderer->framebuffer_resized) {
       mw_recreate_swapchain(renderer);
     }
     MW_ASSERT(result == VK_SUCCESS);
   }
 
-  renderer->currentFrame = (renderer->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+  renderer->current_frame =
+      (renderer->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
   mw_renderer_clean_render_queue(renderer);
 }
 
@@ -173,6 +176,6 @@ void mw_renderer_wait_for_idle(mw_renderer* renderer) {
 }
 
 void mw_renderer_set_framebuffer_size(mw_renderer* renderer, vec2 size) {
-  glm_vec2_copy(size, renderer->framebufferSize);
-  renderer->framebufferResized = 1;
+  glm_vec2_copy(size, renderer->framebuffer_size);
+  renderer->framebuffer_resized = 1;
 }

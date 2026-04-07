@@ -4,7 +4,7 @@
 
 mw_push_constants_data mw_renderer_get_push_constants(mw_renderer* renderer,
                                                       mat4 transform) {
-  float ar = renderer->framebufferSize[0] / renderer->framebufferSize[1];
+  float ar = renderer->framebuffer_size[0] / renderer->framebuffer_size[1];
 
   mat4 proj;
   glm_perspective(45, ar, 0.1, 1000, proj);
@@ -20,6 +20,6 @@ mw_push_constants_data mw_renderer_get_push_constants(mw_renderer* renderer,
   mw_push_constants_data data = {0};
   glm_mat4_copy(transform, data.model);
   glm_mat4_copy(mvp, data.vp);
-  glm_vec4_copy(viewPos, data.viewPos);
+  glm_vec4_copy(viewPos, data.view_pos);
   return data;
 }

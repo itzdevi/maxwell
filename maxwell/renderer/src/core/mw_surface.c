@@ -6,7 +6,7 @@
 VkSurfaceKHR mw_renderer_create_surface(mw_renderer_config config,
                                         VkInstance instance) {
   VkSurfaceKHR surface;
-  MW_ASSERT(config.surfaceCreator(instance, &surface) == VK_SUCCESS);
+  MW_ASSERT(config.surface_creator(instance, &surface) == VK_SUCCESS);
   return surface;
 }
 
