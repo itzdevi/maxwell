@@ -6,7 +6,8 @@
 
 #include "mw_renderer_vertex.h"
 
-typedef VkResult (*mw_renderer_surface_creator)(VkInstance, VkSurfaceKHR*);
+typedef VkResult (*mw_renderer_surface_creator)(VkInstance, VkSurfaceKHR*,
+                                                void*);
 
 typedef struct mw_renderer_config {
   char* title;
@@ -14,6 +15,7 @@ typedef struct mw_renderer_config {
   const char** extensions;
   uint32_t extension_count;
   mw_renderer_surface_creator surface_creator;
+  void* window;
 } mw_renderer_config;
 
 typedef struct mw_render_pass {
