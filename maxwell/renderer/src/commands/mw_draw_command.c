@@ -65,9 +65,6 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
         renderer, renderPass.transform, renderPass.view, renderPass.proj,
         renderPass.viewPos);
 
-    glm_mat4_print(renderPass.view, stdout);
-    // printf("%f\n", renderPass.transform[0]);
-
     vkCmdPushConstants(currentCommandBuffer, renderer->pipeline.layout,
                        VK_SHADER_STAGE_VERTEX_BIT, 0,
                        sizeof(mw_push_constants_data), &pushConstants);
