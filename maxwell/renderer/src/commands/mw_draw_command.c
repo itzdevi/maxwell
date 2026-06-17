@@ -1,5 +1,6 @@
 #include "mw_draw_command.h"
 
+#include <cglm/io.h>
 #include <mw_core.h>
 
 #include "mw_renderer.h"
@@ -60,8 +61,13 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   while (mw_renderer_pop_render_pass(renderer, &renderPass)) {
     mw_mesh mesh = renderer->meshes[renderPass.mesh_index];
 
-    mw_push_constants_data pushConstants =
-        mw_renderer_get_push_constants(renderer, renderPass.transform);
+    mw_push_constants_data pushConstants = mw_renderer_get_push_constants(
+        renderer, renderPass.transform, renderPass.view, renderPass.proj,
+        renderPass.viewPos);
+
+    glm_mat4_print(renderPass.view, stdout);
+    // printf("%f\n", renderPass.transform[0]);
+
     vkCmdPushConstants(currentCommandBuffer, renderer->pipeline.layout,
                        VK_SHADER_STAGE_VERTEX_BIT, 0,
                        sizeof(mw_push_constants_data), &pushConstants);

@@ -7,12 +7,12 @@ endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(
-        -fsanitize=address,undefined
+        # -fsanitize=address,undefined
         -fno-omit-frame-pointer
         -g
     )
     add_link_options(
-        -fsanitize=address,undefined
+        # -fsanitize=address,undefined
     )
 endif()
 

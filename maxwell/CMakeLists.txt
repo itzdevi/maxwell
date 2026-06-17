@@ -5,7 +5,6 @@ find_package(Vulkan REQUIRED)
 
 add_subdirectory(core)
 add_subdirectory(gpu)
-# add_subdirectory(application)
 add_subdirectory(renderer)
 add_subdirectory(engine)
 add_subdirectory(cglm)

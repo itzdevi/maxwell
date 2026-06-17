@@ -106,7 +106,7 @@ VkInstance mw_gpu_create_instance(mw_gpu_config config) {
   createInfo.enabledExtensionCount = extensionCount;
   createInfo.ppEnabledExtensionNames = extensions;
 
-  VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+  VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {0};
   if (enableValidationLayers) {
     createInfo.enabledLayerCount =
         sizeof(validationLayers) / sizeof(validationLayers[0]);

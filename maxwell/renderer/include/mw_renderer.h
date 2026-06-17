@@ -21,6 +21,9 @@ typedef struct mw_renderer_config {
 typedef struct mw_render_pass {
   uint32_t mesh_index;
   mat4 transform;
+  mat4 view;
+  mat4 proj;
+  vec3 viewPos;
 } mw_render_pass;
 
 typedef struct mw_renderer mw_renderer;

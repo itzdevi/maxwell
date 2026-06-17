@@ -18,6 +18,6 @@ target_link_libraries(engine PRIVATE
     core
     renderer
     cglm
-    flecs
+    flecs_static
     glfw
 )
