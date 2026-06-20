@@ -41,8 +41,9 @@ VkExtent2D mw_choose_swap_extent(VkSurfaceCapabilitiesKHR capabilities,
 VkPresentModeKHR mw_choose_swap_present_mode(
     VkPresentModeKHR* availablePresentModes, unsigned int presentModesCount) {
   for (size_t i = 0; i < presentModesCount; i++)
-    if (availablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+    if (availablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
       return availablePresentModes[i];
+    }
 
   return VK_PRESENT_MODE_FIFO_KHR;
 }

@@ -114,7 +114,7 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
       renderer->gpu.device.device, renderer->swapchain.swapchain, UINT64_MAX,
       acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-    mw_recreate_swapchain(renderer);
+    // mw_recreate_swapchain(renderer);
     return;
   } else
     MW_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
@@ -156,12 +156,8 @@ void mw_renderer_draw_frame(mw_renderer* renderer) {
   result = vkQueuePresentKHR(renderer->gpu.device.presentQueue, &presentInfo);
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
       renderer->framebuffer_resized) {
+    mw_recreate_swapchain(renderer);
     renderer->framebuffer_resized = 0;
-  } else {
-    if (!renderer->framebuffer_resized) {
-      mw_recreate_swapchain(renderer);
-    }
-    MW_ASSERT(result == VK_SUCCESS);
   }
 
   renderer->current_frame =
