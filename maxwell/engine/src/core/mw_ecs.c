@@ -45,9 +45,10 @@ void mw_engine_ecs_update(mw_ctx* ctx, double dt) {
 
 uint64_t mw_engine_create_entity(mw_ctx* ctx) { return ecs_new(ctx->ecs); }
 
-void mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
-                                    uint64_t component) {
+const void* mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
+                                           uint64_t component) {
   ecs_add_id(ctx->ecs, entity, component);
+  return ecs_get_id(ctx->ecs, entity, component);
 }
 
 mw_ctx* mw_engine_get_ctx(mw_iter* it) { return ecs_get_ctx(it->world); }

@@ -31,7 +31,7 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
     ivec2 windowSize;
     mw_engine_get_window_size(ctx, windowSize);
 
-    mw_render_pass rp = {.mesh_index = meshRenderer->mesh};
+    mw_render_pass rp = {.mesh_index = meshRenderer->mesh_id};
 
     const mw_position* camPosition =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_POSITION);

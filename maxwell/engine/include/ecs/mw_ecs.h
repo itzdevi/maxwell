@@ -21,8 +21,8 @@ extern uint64_t MW_CAMERA;
 void mw_engine_init_ecs(mw_ctx* ctx);
 void mw_engine_ecs_update(mw_ctx* ctx, double dt);
 uint64_t mw_engine_create_entity(mw_ctx* ctx);
-void mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
-                                    uint64_t component);
+const void* mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
+                                           uint64_t component);
 mw_ctx* mw_engine_get_ctx(mw_iter* it);
 void mw_engine_add_system(mw_ctx* ctx, const char* name,
                           mw_system_callback callback, uint64_t* components,

@@ -18,7 +18,7 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
                                  &commandBufferBeginInfo) == VK_SUCCESS);
 
   VkClearValue clearValues[2];
-  clearValues[0].color = (VkClearColorValue){0.53, 0.81, 0.92, 1.0};
+  clearValues[0].color = (VkClearColorValue){0, 0, 0, 1.0};
   clearValues[1].depthStencil = (VkClearDepthStencilValue){1.0, 0.0};
 
   VkRenderPassBeginInfo renderPassBeginInfo = {0};
