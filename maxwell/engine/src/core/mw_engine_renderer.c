@@ -7,13 +7,6 @@
 #include "mw_context.h"
 
 void mw_engine_create_renderer(mw_ctx* ctx, mw_engine_info info) {
-  mw_vertex vertices[] = {
-      {.position = {-1, 1, 0}},
-      {.position = {1, 1, 0}},
-      {.position = {0, -1, 0}},
-  };
-  uint32_t indices[] = {0, 1, 2};
-
   uint32_t extCount;
   const char** extensions = mw_engine_get_window_extensions(&extCount);
 
@@ -24,7 +17,6 @@ void mw_engine_create_renderer(mw_ctx* ctx, mw_engine_info info) {
                             .extension_count = extCount};
   glm_vec2_copy(info.size, cfg.framebuffer_size);
   ctx->renderer = mw_renderer_initialize(cfg);
-  mw_renderer_add_mesh(ctx->renderer, vertices, 3, indices, 3);
   mw_renderer_submit_meshes(ctx->renderer);
 }
 
@@ -34,4 +26,15 @@ void mw_engine_destroy_renderer(mw_ctx* ctx) {
 
 void mw_engine_renderer_draw(mw_ctx* ctx) {
   mw_renderer_draw_frame(ctx->renderer);
+}
+
+void mw_engine_renderer_finalize(mw_ctx* ctx) {
+  mw_renderer_submit_meshes(ctx->renderer);
+}
+
+void mw_engine_renderer_add_mesh(mw_ctx* ctx, mw_vertex* vertices,
+                                 uint32_t vertex_count, uint32_t* indices,
+                                 uint32_t index_count) {
+  mw_renderer_add_mesh(ctx->renderer, vertices, vertex_count, indices,
+                       index_count);
 }

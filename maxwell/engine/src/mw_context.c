@@ -18,6 +18,8 @@ mw_ctx* mw_engine_create(mw_engine_info info) {
 }
 
 void mw_engine_run(mw_ctx* ctx) {
+  mw_engine_renderer_finalize(ctx);
+
   double lastTime = mw_engine_get_window_time();
   while (!mw_engine_get_window_should_close(ctx)) {
     double currTime = mw_engine_get_window_time();

@@ -28,25 +28,26 @@ int main() {
   camComp->far_plane = 1000;
   camComp->fov = 60;
 
-  uint64_t triangle = mw_engine_create_entity(engine);
-  mw_position* triPos = (mw_position*)mw_engine_entity_add_component(
-      engine, triangle, MW_POSITION);
-  glm_vec3_copy((vec3){0, 0, 0}, triPos->data);
-
-  mw_rotation* triRot = (mw_rotation*)mw_engine_entity_add_component(
-      engine, triangle, MW_ROTATION);
-  glm_vec3_copy((vec3){0, 0, 0}, triRot->data);
-
-  mw_scale* triScale =
-      (mw_scale*)mw_engine_entity_add_component(engine, triangle, MW_SCALE);
-  glm_vec3_copy((vec3){1, 1, 1}, triScale->data);
-
-  mw_mesh_renderer* triRenderer =
-      (mw_mesh_renderer*)mw_engine_entity_add_component(engine, triangle,
-                                                        MW_MESH_RENDERER);
-  triRenderer->mesh_id = 0;
-
   mw_engine_set_main_camera_entity(engine, cam);
+
+  mw_load_glb(engine, "../assets/models/ABeautifulGame.glb");
+
+  uint64_t piece = mw_engine_create_entity(engine);
+  mw_position* piecePos =
+      (mw_position*)mw_engine_entity_add_component(engine, piece, MW_POSITION);
+  glm_vec3_copy((vec3){0, 0, 0}, piecePos->data);
+
+  mw_rotation* pieceRot =
+      (mw_rotation*)mw_engine_entity_add_component(engine, piece, MW_ROTATION);
+  glm_vec3_copy((vec3){0, 0, 0}, pieceRot->data);
+
+  mw_scale* pieceScale =
+      (mw_scale*)mw_engine_entity_add_component(engine, piece, MW_SCALE);
+  glm_vec3_copy((vec3){30, 30, 30}, pieceScale->data);
+
+  mw_mesh_renderer* pieceMR = (mw_mesh_renderer*)mw_engine_entity_add_component(
+      engine, piece, MW_MESH_RENDERER);
+  pieceMR->mesh_id = 5;
 
   mw_engine_run(engine);
   mw_engine_destroy(engine);

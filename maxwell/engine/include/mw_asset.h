@@ -3,6 +3,6 @@
 
 #include "mw_context.h"
 
-void load_glb(mw_ctx* ctx, const char* uri);
+void mw_load_glb(mw_ctx* ctx, const char* uri);
 
 #endif
