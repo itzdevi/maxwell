@@ -17,13 +17,15 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
       mw_engine_get_field(it, sizeof(mw_mesh_renderer), 3);
 
   for (size_t i = 0; i < it->count; i++) {
+    mat4 rotMat;
+    glm_quat_mat4(rot[i], rotMat);
+
     mat4 transform;
     glm_mat4_identity(transform);
-    glm_scale(transform, scale[i].data);
-    glm_rotate(transform, rot[i].data[0], (vec3){1, 0, 0});
-    glm_rotate(transform, rot[i].data[1], (vec3){0, 1, 0});
-    glm_rotate(transform, rot[i].data[2], (vec3){0, 0, 1});
-    glm_translate(transform, pos[i].data);
+    glm_translate(transform, pos[i]);
+    glm_mat4_mul(transform, rotMat, transform);
+
+    glm_scale(transform, scale[i]);
 
     const mw_camera* cam =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_CAMERA);
@@ -31,12 +33,12 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
     ivec2 windowSize;
     mw_engine_get_window_size(ctx, windowSize);
 
-    mw_render_pass rp = {.mesh_index = meshRenderer->mesh_id};
+    mw_render_pass rp = {.mesh_index = meshRenderer[i].mesh_id};
 
     const mw_position* camPosition =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_POSITION);
-    glm_lookat(camPosition->data, GLM_VEC3_ZERO, GLM_YUP, rp.view);
-    glm_vec3_copy(camPosition->data, rp.viewPos);
+    glm_lookat(*camPosition, GLM_VEC3_ZERO, GLM_YUP, rp.view);
+    glm_vec3_copy(*camPosition, rp.viewPos);
 
     glm_perspective(glm_rad(cam->fov), (float)windowSize[0] / windowSize[1],
                     cam->near_plane, cam->far_plane, rp.proj);

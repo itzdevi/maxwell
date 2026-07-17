@@ -3,8 +3,7 @@
 
 #include <cglm/cglm.h>
 
-typedef struct {
-  vec3 data;
-} mw_position, mw_rotation, mw_scale, mw_velocity, mw_angular_velocity;
+typedef vec3 mw_position, mw_scale, mw_velocity, mw_angular_velocity;
+typedef versor mw_rotation;
 
 #endif
