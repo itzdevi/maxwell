@@ -10,6 +10,7 @@ add_library(gpu STATIC
 target_link_libraries(gpu PUBLIC
     Vulkan::Vulkan
     core
+    VulkanMemoryAllocator
 )
 
 target_include_directories(gpu
