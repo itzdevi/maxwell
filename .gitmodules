@@ -7,6 +7,3 @@
 [submodule "maxwell/flecs"]
 	path = maxwell/flecs
 	url = https://github.com/SanderMertens/flecs.git
-[submodule "maxwell/VulkanMemoryAllocator"]
-	path = maxwell/VulkanMemoryAllocator
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

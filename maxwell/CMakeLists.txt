@@ -10,7 +10,6 @@ add_subdirectory(engine)
 add_subdirectory(cglm)
 add_subdirectory(glfw)
 add_subdirectory(flecs)
-add_subdirectory(VulkanMemoryAllocator)
 
 add_library(maxwell INTERFACE)
 target_link_libraries(maxwell INTERFACE

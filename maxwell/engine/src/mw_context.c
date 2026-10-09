@@ -37,5 +37,6 @@ void mw_engine_run(mw_ctx* ctx) {
 void mw_engine_destroy(mw_ctx* ctx) {
   mw_engine_destroy_renderer(ctx);
   mw_engine_destroy_window(ctx);
+  ecs_fini(ctx->ecs);
   free(ctx);
 }

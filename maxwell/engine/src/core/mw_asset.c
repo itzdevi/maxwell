@@ -34,7 +34,7 @@ void mw_load_glb(mw_ctx* ctx, const char* uri) {
           if (attrib.type == cgltf_attribute_type_position) {
             for (size_t j = 0; j < verticesCount; j++) {
               MW_ASSERT(cgltf_accessor_read_float(
-                  attrib.data, j, vertices[j].position, sizeof(vec3)));
+                  attrib.data, j, vertices[j].position, 3));
               vertices[j].position[1] *= -1;
             }
           }
@@ -42,7 +42,7 @@ void mw_load_glb(mw_ctx* ctx, const char* uri) {
           if (attrib.type == cgltf_attribute_type_normal) {
             for (size_t j = 0; j < verticesCount; j++) {
               MW_ASSERT(cgltf_accessor_read_float(
-                  attrib.data, j, vertices[j].normal, sizeof(vec3)));
+                  attrib.data, j, vertices[j].normal, 3));
               vertices[j].normal[1] *= -1;
             }
           }
@@ -50,7 +50,7 @@ void mw_load_glb(mw_ctx* ctx, const char* uri) {
           if (attrib.type == cgltf_attribute_type_texcoord) {
             for (size_t j = 0; j < verticesCount; j++) {
               MW_ASSERT(cgltf_accessor_read_float(
-                  attrib.data, j, vertices[j].uv, sizeof(vec2)));
+                  attrib.data, j, vertices[j].uv, 2));
             }
           }
         }
@@ -68,6 +68,7 @@ void mw_load_glb(mw_ctx* ctx, const char* uri) {
 
     for (size_t n = 0; n < data->nodes_count; n++) {
       cgltf_node node = data->nodes[n];
+      if (node.mesh == NULL) continue;
 
       mat4 worldMat;
       cgltf_node_transform_world(&node, *worldMat);

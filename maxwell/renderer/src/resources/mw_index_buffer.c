@@ -20,7 +20,7 @@ mw_buffer mw_renderer_create_index_buffer(mw_renderer* renderer,
   vkUnmapMemory(renderer->gpu.device.device, stagingBuffer.memory);
 
   mw_buffer indexBuffer = mw_renderer_create_buffer(
-      renderer, bufferSize, sizeof(uint32_t),
+      renderer, indicesCount, sizeof(uint32_t),
       VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 

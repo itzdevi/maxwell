@@ -53,7 +53,9 @@ mw_device mw_gpu_create_device(VkPhysicalDevice physicalDevice,
   uniqueQueueFamilies[queueCount++] = indices.graphicsFamily;
   if (indices.presentFamily != indices.graphicsFamily)
     uniqueQueueFamilies[queueCount++] = indices.presentFamily;
-  uniqueQueueFamilies[queueCount++] = indices.transferFamily;
+  if (indices.transferFamily != indices.graphicsFamily &&
+      indices.transferFamily != indices.presentFamily)
+    uniqueQueueFamilies[queueCount++] = indices.transferFamily;
 
   VkDeviceQueueCreateInfo queueCreateInfos[3] = {0};
   for (uint32_t i = 0; i < queueCount; i++) {

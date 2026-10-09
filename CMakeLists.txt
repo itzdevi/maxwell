@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(RadarSim VERSION 1.0 LANGUAGES C)
+project(Maxwell VERSION 1.0 LANGUAGES CXX)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)

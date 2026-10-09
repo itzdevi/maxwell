@@ -15,7 +15,6 @@ int main() {
   uint64_t camComps[] = {MW_POSITION, MW_CAMERA};
   mw_engine_add_system(engine, "CameraController", camera_controller, camComps,
                        2);
-  uint64_t meshComps[] = {MW_POSITION, MW_MESH_RENDERER};
 
   uint64_t cam = mw_engine_create_entity(engine);
   mw_position* camPos =

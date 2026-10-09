@@ -224,10 +224,10 @@ void mw_renderer_destroy_swapchain(mw_renderer* renderer) {
     vkDestroyImageView(renderer->gpu.device.device,
                        renderer->swapchain.image_views[i], NULL);
 
+  vkDestroyImageView(renderer->gpu.device.device,
+                    renderer->swapchain.depth_image_view, NULL);
   vkDestroyImage(renderer->gpu.device.device, renderer->swapchain.depth_image,
                  NULL);
-  vkDestroyImageView(renderer->gpu.device.device,
-                     renderer->swapchain.depth_image_view, NULL);
   vkFreeMemory(renderer->gpu.device.device,
                renderer->swapchain.depth_image_memory, NULL);
   free(renderer->swapchain.image_views);

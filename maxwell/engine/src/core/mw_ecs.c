@@ -57,7 +57,7 @@ void mw_engine_add_system(mw_ctx* ctx, const char* name,
                           mw_system_callback callback, uint64_t* components,
                           size_t count) {
   ecs_system_desc_t desc = {0};
-  ecs_set_name(ctx->ecs, desc.entity, name);
+  desc.entity = ecs_entity(ctx->ecs, {.name = name});
   desc.phase = EcsOnUpdate;
   desc.callback = callback;
 

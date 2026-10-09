@@ -35,6 +35,8 @@ mw_queue_family_indices mw_gpu_find_queue_families(VkPhysicalDevice device,
 
     if (mw_gpu_check_queue_families(indices)) break;
   }
+  if (indices.transferFamily == -1)
+    indices.transferFamily = indices.graphicsFamily;
 
   return indices;
 }

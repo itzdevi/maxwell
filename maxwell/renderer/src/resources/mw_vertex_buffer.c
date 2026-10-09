@@ -23,7 +23,7 @@ mw_buffer mw_renderer_create_vertex_buffer(mw_renderer* renderer,
   vkUnmapMemory(renderer->gpu.device.device, stagingBuffer.memory);
 
   mw_buffer vertexBuffer = mw_renderer_create_buffer(
-      renderer, bufferSize, sizeof(mw_vertex),
+      renderer, verticesCount, sizeof(mw_vertex),
       VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 

@@ -52,7 +52,7 @@ mw_buffer mw_renderer_create_buffer(mw_renderer* renderer, uint32_t count,
   vkBindBufferMemory(renderer->gpu.device.device, buffer, memory, 0);
 
   return (mw_buffer){
-      .buffer = buffer, .memory = memory, .size = count, .stride = stride};
+      .buffer = buffer, .memory = memory, .size = (size_t)count * stride, .stride = stride};
 }
 
 void mw_renderer_destroy_buffer(mw_renderer* renderer, mw_buffer buffer) {
