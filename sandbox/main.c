@@ -1,10 +1,18 @@
 #include <maxwell.h>
 
+float time = 0;
+
 void camera_controller(mw_iter* it) {
   const mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
-  const mw_camera* camera = mw_engine_get_field(it, sizeof(mw_camera), 1);
+  const mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
+  const mw_camera* camera = mw_engine_get_field(it, sizeof(mw_camera), 2);
+
+  time += 0.0004;
 
   for (int i = 0; i < mw_engine_get_iter_count(it); i++) {
+    glm_vec3_copy((vec3){0, sin(time) * 0.2, -1.2}, *pos);
+    glm_euler_xyz_quat(
+        (vec3){glm_rad(0.0), glm_rad(sin(time / 2) * 20), glm_rad(0.0)}, *rot);
   }
 }
 
@@ -12,14 +20,17 @@ int main() {
   mw_engine_info info = {.title = "Sandbox", .size = {1800, 1200}};
   mw_ctx* engine = mw_engine_create(info);
 
-  uint64_t camComps[] = {MW_POSITION, MW_CAMERA};
+  uint64_t camComps[] = {MW_POSITION, MW_ROTATION, MW_CAMERA};
   mw_engine_add_system(engine, "CameraController", camera_controller, camComps,
-                       2);
+                       3);
 
   uint64_t cam = mw_engine_create_entity(engine);
-  mw_position* camPos =
+  const mw_position* camPos =
       mw_engine_entity_add_component(engine, cam, MW_POSITION);
-  glm_vec3_copy((vec3){0, -0.6, 0.8}, *camPos);
+  glm_vec3_copy((vec3){0, 0, 0}, *camPos);
+  const mw_rotation* camRot =
+      mw_engine_entity_add_component(engine, cam, MW_ROTATION);
+  glm_euler_xyz_quat((vec3){glm_rad(0.0), glm_rad(0.0), glm_rad(0.0)}, *camRot);
 
   mw_camera* camComp =
       (mw_camera*)mw_engine_entity_add_component(engine, cam, MW_CAMERA);

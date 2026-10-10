@@ -37,7 +37,18 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
 
     const mw_position* camPosition =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_POSITION);
-    glm_lookat(*camPosition, GLM_VEC3_ZERO, GLM_YUP, rp.view);
+    const mw_rotation* camRotation =
+        mw_engine_get_component_it(it, ctx->main_camera_entity, MW_ROTATION);
+
+    mat4 viewRotMat;
+    glm_quat_mat4(*camRotation, viewRotMat);
+
+    mat4 viewMat;
+    glm_mat4_identity(viewMat);
+    glm_mat4_mul(viewMat, viewRotMat, viewMat);
+    glm_translate(viewMat, *camPosition);
+    glm_mat4_copy(viewMat, rp.view);
+
     glm_vec3_copy(*camPosition, rp.viewPos);
 
     glm_perspective(glm_rad(cam->fov), (float)windowSize[0] / windowSize[1],
