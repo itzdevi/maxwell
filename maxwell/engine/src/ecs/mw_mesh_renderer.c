@@ -10,10 +10,10 @@
 
 void mw_engine_system_draw_mesh(mw_iter* it) {
   mw_ctx* ctx = mw_engine_get_ctx(it);
-  const mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
-  const mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
-  const mw_scale* scale = mw_engine_get_field(it, sizeof(mw_scale), 2);
-  const mw_mesh_renderer* meshRenderer =
+  mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
+  mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
+  mw_scale* scale = mw_engine_get_field(it, sizeof(mw_scale), 2);
+  mw_mesh_renderer* meshRenderer =
       mw_engine_get_field(it, sizeof(mw_mesh_renderer), 3);
 
   for (size_t i = 0; i < it->count; i++) {
@@ -27,7 +27,7 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
 
     glm_scale(transform, scale[i]);
 
-    const mw_camera* cam =
+    mw_camera* cam =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_CAMERA);
 
     ivec2 windowSize;
@@ -35,9 +35,9 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
 
     mw_render_pass rp = {.mesh_index = meshRenderer[i].mesh_id};
 
-    const mw_position* camPosition =
+    mw_position* camPosition =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_POSITION);
-    const mw_rotation* camRotation =
+    mw_rotation* camRotation =
         mw_engine_get_component_it(it, ctx->main_camera_entity, MW_ROTATION);
 
     mat4 viewRotMat;

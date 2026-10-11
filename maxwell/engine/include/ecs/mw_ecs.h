@@ -28,10 +28,9 @@ void mw_engine_add_system(mw_ctx* ctx, const char* name,
                           mw_system_callback callback, uint64_t* components,
                           size_t count);
 void* mw_engine_get_field(mw_iter* it, size_t size, int index);
-const void* mw_engine_get_component(mw_ctx* ctx, uint64_t entity,
-                                    uint64_t component);
-const void* mw_engine_get_component_it(mw_iter* it, uint64_t entity,
-                                       uint64_t component);
+void* mw_engine_get_component(mw_ctx* ctx, uint64_t entity, uint64_t component);
+void* mw_engine_get_component_it(mw_iter* it, uint64_t entity,
+                                 uint64_t component);
 uint32_t mw_engine_get_iter_count(mw_iter* it);
 
 void mw_engine_set_main_camera_entity(mw_ctx* ctx, uint64_t entity);

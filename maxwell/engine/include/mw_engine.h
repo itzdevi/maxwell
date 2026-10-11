@@ -1,6 +1,7 @@
 #ifndef MW_ENGINE_H
 #define MW_ENGINE_H
 
+#include "api/mw_component_builder.h"
 #include "api/mw_time.h"
 #include "ecs/mw_camera.h"
 #include "ecs/mw_ecs.h"

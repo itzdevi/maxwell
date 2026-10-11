@@ -72,14 +72,14 @@ void* mw_engine_get_field(mw_iter* it, size_t size, int index) {
   return ecs_field_w_size(it, size, index);
 }
 
-const void* mw_engine_get_component(mw_ctx* ctx, uint64_t entity,
-                                    uint64_t component) {
-  return ecs_get_id(ctx->ecs, entity, component);
+void* mw_engine_get_component(mw_ctx* ctx, uint64_t entity,
+                              uint64_t component) {
+  return (void*)ecs_get_id(ctx->ecs, entity, component);
 }
 
-const void* mw_engine_get_component_it(mw_iter* it, uint64_t entity,
-                                       uint64_t component) {
-  return ecs_get_id(it->world, entity, component);
+void* mw_engine_get_component_it(mw_iter* it, uint64_t entity,
+                                 uint64_t component) {
+  return (void*)ecs_get_id(it->world, entity, component);
 }
 
 uint32_t mw_engine_get_iter_count(mw_iter* it) { return it->count; }

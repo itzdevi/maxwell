@@ -8,10 +8,10 @@ void camera_controller(mw_iter* it) {
   mw_time time = mw_get_time(it);
 
   for (int i = 0; i < mw_engine_get_iter_count(it); i++) {
-    glm_vec3_copy((vec3){0, sin(time.time) * 0.2, -1.2}, (float*)pos[i]);
+    glm_vec3_copy((vec3){0, sin(time.time) * 0.2, -1.2}, pos[i]);
     glm_euler_xyz_quat(
         (vec3){glm_rad(0.0), glm_rad(sin(time.time / 2) * 20), glm_rad(0.0)},
-        (float*)rot[i]);
+        rot[i]);
   }
 }
 
@@ -24,19 +24,9 @@ int main() {
                        3);
 
   uint64_t cam = mw_engine_create_entity(engine);
-  mw_position* camPos =
-      mw_engine_entity_add_component(engine, cam, MW_POSITION);
-  glm_vec3_copy((vec3){0, 0, 0}, *(mw_position*)camPos);
-  mw_rotation* camRot =
-      mw_engine_entity_add_component(engine, cam, MW_ROTATION);
-  glm_euler_xyz_quat((vec3){glm_rad(0.0), glm_rad(0.0), glm_rad(0.0)},
-                     *(mw_rotation*)camRot);
+  mw_build_transform_no_scale(engine, cam);
 
-  mw_camera* camComp =
-      (mw_camera*)mw_engine_entity_add_component(engine, cam, MW_CAMERA);
-  camComp->near_plane = 0.1;
-  camComp->far_plane = 1000;
-  camComp->fov = 60;
+  mw_camera* camComp = mw_build_camera(engine, cam, 0.1, 1000, 60);
 
   mw_engine_set_main_camera_entity(engine, cam);
 
