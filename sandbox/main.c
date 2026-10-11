@@ -1,18 +1,17 @@
 #include <maxwell.h>
 
-float time = 0;
-
 void camera_controller(mw_iter* it) {
   const mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
   const mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
   const mw_camera* camera = mw_engine_get_field(it, sizeof(mw_camera), 2);
 
-  time += 0.0004;
+  mw_time time = mw_get_time(it);
 
   for (int i = 0; i < mw_engine_get_iter_count(it); i++) {
-    glm_vec3_copy((vec3){0, sin(time) * 0.2, -1.2}, *pos);
+    glm_vec3_copy((vec3){0, sin(time.time) * 0.2, -1.2}, (float*)pos[i]);
     glm_euler_xyz_quat(
-        (vec3){glm_rad(0.0), glm_rad(sin(time / 2) * 20), glm_rad(0.0)}, *rot);
+        (vec3){glm_rad(0.0), glm_rad(sin(time.time / 2) * 20), glm_rad(0.0)},
+        (float*)rot[i]);
   }
 }
 
@@ -27,10 +26,11 @@ int main() {
   uint64_t cam = mw_engine_create_entity(engine);
   const mw_position* camPos =
       mw_engine_entity_add_component(engine, cam, MW_POSITION);
-  glm_vec3_copy((vec3){0, 0, 0}, *camPos);
+  glm_vec3_copy((vec3){0, 0, 0}, *(mw_position*)camPos);
   const mw_rotation* camRot =
       mw_engine_entity_add_component(engine, cam, MW_ROTATION);
-  glm_euler_xyz_quat((vec3){glm_rad(0.0), glm_rad(0.0), glm_rad(0.0)}, *camRot);
+  glm_euler_xyz_quat((vec3){glm_rad(0.0), glm_rad(0.0), glm_rad(0.0)},
+                     *(mw_rotation*)camRot);
 
   mw_camera* camComp =
       (mw_camera*)mw_engine_entity_add_component(engine, cam, MW_CAMERA);
