@@ -1,9 +1,9 @@
 #include <maxwell.h>
 
 void camera_controller(mw_iter* it) {
-  const mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
-  const mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
-  const mw_camera* camera = mw_engine_get_field(it, sizeof(mw_camera), 2);
+  mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
+  mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
+  mw_camera* camera = mw_engine_get_field(it, sizeof(mw_camera), 2);
 
   mw_time time = mw_get_time(it);
 
@@ -24,10 +24,10 @@ int main() {
                        3);
 
   uint64_t cam = mw_engine_create_entity(engine);
-  const mw_position* camPos =
+  mw_position* camPos =
       mw_engine_entity_add_component(engine, cam, MW_POSITION);
   glm_vec3_copy((vec3){0, 0, 0}, *(mw_position*)camPos);
-  const mw_rotation* camRot =
+  mw_rotation* camRot =
       mw_engine_entity_add_component(engine, cam, MW_ROTATION);
   glm_euler_xyz_quat((vec3){glm_rad(0.0), glm_rad(0.0), glm_rad(0.0)},
                      *(mw_rotation*)camRot);
