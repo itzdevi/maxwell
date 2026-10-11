@@ -8,10 +8,8 @@ void camera_controller(mw_iter* it) {
   mw_time time = mw_get_time(it);
 
   for (int i = 0; i < mw_engine_get_iter_count(it); i++) {
-    glm_vec3_copy((vec3){0, sin(time.time) * 0.2, -1.2}, pos[i]);
-    glm_euler_xyz_quat(
-        (vec3){glm_rad(0.0), glm_rad(sin(time.time / 2) * 20), glm_rad(0.0)},
-        rot[i]);
+    glm_vec3_copy((vec3){0, .4, -1}, pos[i]);
+    glm_euler_xyz_quat((vec3){glm_rad(-8), 0, 0}, rot[i]);
   }
 }
 
@@ -30,6 +28,7 @@ int main() {
 
   mw_engine_set_main_camera_entity(engine, cam);
 
+  // mw_load_glb(engine, "../assets/models/suzzane.glb");
   mw_load_glb(engine, "../assets/models/ABeautifulGame.glb");
 
   mw_engine_run(engine);

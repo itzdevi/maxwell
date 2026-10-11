@@ -6,7 +6,7 @@ layout(location = 2) in vec3 inViewPos;
 
 layout (location = 0) out vec4 outColor;
 
-vec3 lightPos = vec3(4, -0.5, 0);
+vec3 lightPos = vec3(4, -3, 0);
 vec3 lightColor = vec3(1, 1, 1);
 
 void main() {
