@@ -72,18 +72,16 @@ int main() {
   mw_engine_info info = {.title = "Sandbox", .size = {1920 / 1.5, 1080 / 1.5}};
   mw_ctx* engine = mw_engine_create(info);
 
-  uint64_t camComps[] = {MW_POSITION, MW_ROTATION, MW_CAMERA};
+  uint64_t camComps[] = {MW_COMPONENT_POSITION, MW_COMPONENT_ROTATION,
+                         MW_COMPONENT_CAMERA};
   mw_engine_add_system(engine, "CameraController", camera_controller, camComps,
                        3);
 
-  uint64_t cam = mw_engine_create_entity(engine);
-  mw_build_transform_no_scale(engine, cam);
-
-  mw_camera* camComp = mw_build_camera(engine, cam, 0.01, 1000, 60);
-
+  uint64_t cam = mw_make_camera_entity(engine, 0.01, 1000, 60, (void*)0);
   mw_engine_set_main_camera_entity(engine, cam);
 
-  mw_position* camPos = mw_engine_get_component(engine, cam, MW_POSITION);
+  mw_position* camPos =
+      mw_engine_get_component(engine, cam, MW_COMPONENT_POSITION);
   glm_vec3_copy((vec3){0, -0.4, 1}, *camPos);
 
   glm_vec3_zero(rotation);

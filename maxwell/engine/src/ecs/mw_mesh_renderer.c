@@ -27,18 +27,18 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
 
     glm_scale(transform, scale[i]);
 
-    mw_camera* cam =
-        mw_engine_get_component_it(it, ctx->main_camera_entity, MW_CAMERA);
+    mw_camera* cam = mw_engine_get_component_it(it, ctx->main_camera_entity,
+                                                MW_COMPONENT_CAMERA);
 
     ivec2 windowSize;
     mw_engine_get_window_size(ctx, windowSize);
 
     mw_render_pass rp = {.mesh_index = meshRenderer[i].mesh_id};
 
-    mw_position* camPosition =
-        mw_engine_get_component_it(it, ctx->main_camera_entity, MW_POSITION);
-    mw_rotation* camRotation =
-        mw_engine_get_component_it(it, ctx->main_camera_entity, MW_ROTATION);
+    mw_position* camPosition = mw_engine_get_component_it(
+        it, ctx->main_camera_entity, MW_COMPONENT_POSITION);
+    mw_rotation* camRotation = mw_engine_get_component_it(
+        it, ctx->main_camera_entity, MW_COMPONENT_ROTATION);
 
     mat4 viewRotMat;
     glm_quat_mat4(*camRotation, viewRotMat);

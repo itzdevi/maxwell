@@ -10,13 +10,13 @@ typedef struct ecs_iter_t mw_iter;
 
 typedef void (*mw_system_callback)(mw_iter* iter);
 
-extern uint64_t MW_POSITION;
-extern uint64_t MW_ROTATION;
-extern uint64_t MW_SCALE;
-extern uint64_t MW_VELOCITY;
-extern uint64_t MW_ANGULAR_VELOCITY;
-extern uint64_t MW_MESH_RENDERER;
-extern uint64_t MW_CAMERA;
+extern uint64_t MW_COMPONENT_POSITION;
+extern uint64_t MW_COMPONENT_ROTATION;
+extern uint64_t MW_COMPONENT_SCALE;
+extern uint64_t MW_COMPONENT_VELOCITY;
+extern uint64_t MW_COMPONENT_ANGULAR_VELOCITY;
+extern uint64_t MW_COMPONENT_MESH_RENDERER;
+extern uint64_t MW_COMPONENT_CAMERA;
 
 void mw_engine_init_ecs(mw_ctx* ctx);
 void mw_engine_ecs_update(mw_ctx* ctx, double dt);

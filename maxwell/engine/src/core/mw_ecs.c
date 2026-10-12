@@ -5,13 +5,13 @@
 #include "ecs/mw_mesh_renderer.h"
 #include "ecs/mw_transform.h"
 
-uint64_t MW_POSITION;
-uint64_t MW_ROTATION;
-uint64_t MW_SCALE;
-uint64_t MW_VELOCITY;
-uint64_t MW_ANGULAR_VELOCITY;
-uint64_t MW_MESH_RENDERER;
-uint64_t MW_CAMERA;
+uint64_t MW_COMPONENT_POSITION;
+uint64_t MW_COMPONENT_ROTATION;
+uint64_t MW_COMPONENT_SCALE;
+uint64_t MW_COMPONENT_VELOCITY;
+uint64_t MW_COMPONENT_ANGULAR_VELOCITY;
+uint64_t MW_COMPONENT_MESH_RENDERER;
+uint64_t MW_COMPONENT_CAMERA;
 
 void mw_engine_init_ecs(mw_ctx* ctx) {
   ctx->ecs = ecs_init();
@@ -26,17 +26,19 @@ void mw_engine_init_ecs(mw_ctx* ctx) {
   ECS_COMPONENT(ctx->ecs, mw_camera);
 
   // Map Flecs internal IDs to our public variables
-  MW_POSITION = ecs_id(mw_position);
-  MW_ROTATION = ecs_id(mw_rotation);
-  MW_SCALE = ecs_id(mw_scale);
-  MW_VELOCITY = ecs_id(mw_velocity);
-  MW_ANGULAR_VELOCITY = ecs_id(mw_angular_velocity);
-  MW_MESH_RENDERER = ecs_id(mw_mesh_renderer);
-  MW_CAMERA = ecs_id(mw_camera);
+  MW_COMPONENT_POSITION = ecs_id(mw_position);
+  MW_COMPONENT_ROTATION = ecs_id(mw_rotation);
+  MW_COMPONENT_SCALE = ecs_id(mw_scale);
+  MW_COMPONENT_VELOCITY = ecs_id(mw_velocity);
+  MW_COMPONENT_ANGULAR_VELOCITY = ecs_id(mw_angular_velocity);
+  MW_COMPONENT_MESH_RENDERER = ecs_id(mw_mesh_renderer);
+  MW_COMPONENT_CAMERA = ecs_id(mw_camera);
 
   mw_engine_add_system(
       ctx, "mesh_renderer", mw_engine_system_draw_mesh,
-      (uint64_t[]){MW_POSITION, MW_ROTATION, MW_SCALE, MW_MESH_RENDERER}, 4);
+      (uint64_t[]){MW_COMPONENT_POSITION, MW_COMPONENT_ROTATION,
+                   MW_COMPONENT_SCALE, MW_COMPONENT_MESH_RENDERER},
+      4);
 }
 
 void mw_engine_ecs_update(mw_ctx* ctx, double dt) {

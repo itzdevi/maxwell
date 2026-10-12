@@ -33,24 +33,24 @@ void mw_load_glb(mw_ctx* ctx, const char* uri) {
 
           if (attrib.type == cgltf_attribute_type_position) {
             for (size_t j = 0; j < verticesCount; j++) {
-              MW_ASSERT(cgltf_accessor_read_float(
-                  attrib.data, j, vertices[j].position, 3));
+              MW_ASSERT(cgltf_accessor_read_float(attrib.data, j,
+                                                  vertices[j].position, 3));
               vertices[j].position[1] *= -1;
             }
           }
 
           if (attrib.type == cgltf_attribute_type_normal) {
             for (size_t j = 0; j < verticesCount; j++) {
-              MW_ASSERT(cgltf_accessor_read_float(
-                  attrib.data, j, vertices[j].normal, 3));
+              MW_ASSERT(cgltf_accessor_read_float(attrib.data, j,
+                                                  vertices[j].normal, 3));
               vertices[j].normal[1] *= -1;
             }
           }
 
           if (attrib.type == cgltf_attribute_type_texcoord) {
             for (size_t j = 0; j < verticesCount; j++) {
-              MW_ASSERT(cgltf_accessor_read_float(
-                  attrib.data, j, vertices[j].uv, 2));
+              MW_ASSERT(
+                  cgltf_accessor_read_float(attrib.data, j, vertices[j].uv, 2));
             }
           }
         }
@@ -83,17 +83,20 @@ void mw_load_glb(mw_ctx* ctx, const char* uri) {
 
       uint64_t e = mw_engine_create_entity(ctx);
 
-      mw_position* pos = mw_engine_entity_add_component(ctx, e, MW_POSITION);
+      mw_position* pos =
+          mw_engine_entity_add_component(ctx, e, MW_COMPONENT_POSITION);
       glm_vec3_copy(objPos, *pos);
 
-      mw_rotation* rot = mw_engine_entity_add_component(ctx, e, MW_ROTATION);
+      mw_rotation* rot =
+          mw_engine_entity_add_component(ctx, e, MW_COMPONENT_ROTATION);
       glm_vec4_ucopy(objRot, *rot);
 
-      mw_scale* scale = mw_engine_entity_add_component(ctx, e, MW_SCALE);
+      mw_scale* scale =
+          mw_engine_entity_add_component(ctx, e, MW_COMPONENT_SCALE);
       glm_vec3_copy(objScale, *scale);
 
       mw_mesh_renderer* mr =
-          mw_engine_entity_add_component(ctx, e, MW_MESH_RENDERER);
+          mw_engine_entity_add_component(ctx, e, MW_COMPONENT_MESH_RENDERER);
       mr->mesh_id = node.mesh - data->meshes;
     }
     cgltf_free(data);
