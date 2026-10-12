@@ -1,6 +1,7 @@
 #include "api/mw_time.h"
 
-#include "core/mw_engine_def.h"
+#include <flecs.h>
+
 #include "core/mw_window.h"
 
 mw_time mw_get_time(mw_iter* it) {

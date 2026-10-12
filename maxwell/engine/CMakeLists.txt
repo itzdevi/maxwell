@@ -7,6 +7,7 @@ add_library(engine STATIC
     src/ecs/mw_mesh_renderer.c
     src/api/mw_time.c
     src/api/mw_component_builder.c
+    src/api/mw_input.c
 )
 
 target_include_directories(engine

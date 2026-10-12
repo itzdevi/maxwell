@@ -43,11 +43,13 @@ void mw_engine_system_draw_mesh(mw_iter* it) {
     mat4 viewRotMat;
     glm_quat_mat4(*camRotation, viewRotMat);
 
-    mat4 viewMat;
-    glm_mat4_identity(viewMat);
-    glm_mat4_mul(viewMat, viewRotMat, viewMat);
-    glm_translate(viewMat, *camPosition);
-    glm_mat4_copy(viewMat, rp.view);
+    versor camRotInv;
+    glm_quat_inv(*camRotation, camRotInv);
+    glm_quat_mat4(camRotInv, rp.view);
+
+    vec3 negCamPos;
+    glm_vec3_negate_to(*camPosition, negCamPos);
+    glm_translate(rp.view, negCamPos);
 
     glm_vec3_copy(*camPosition, rp.viewPos);
 

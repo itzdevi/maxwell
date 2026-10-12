@@ -1,5 +1,7 @@
 #include <maxwell.h>
 
+vec3 rotation;
+
 void camera_controller(mw_iter* it) {
   mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
   mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
@@ -7,14 +9,64 @@ void camera_controller(mw_iter* it) {
 
   mw_time time = mw_get_time(it);
 
+  vec2 mouseDelta;
+  mw_mouse_delta(it, mouseDelta);
+
   for (int i = 0; i < mw_engine_get_iter_count(it); i++) {
-    glm_vec3_copy((vec3){0, .4, -1}, pos[i]);
-    glm_euler_xyz_quat((vec3){glm_rad(-8), 0, 0}, rot[i]);
+    rotation[1] -= mouseDelta[0] * 0.0003;
+    rotation[0] += mouseDelta[1] * 0.0003;
+    rotation[0] = glm_clamp(rotation[0], glm_rad(-90), glm_rad(90));
+    glm_euler_yxz_quat(rotation, rot[i]);
+
+    vec2 velocityHorizontal;
+    glm_vec2_zero(velocityHorizontal);
+    float velocityVertical;
+
+    if (mw_key_pressed(it, MW_KEY_W)) {
+      velocityHorizontal[1] = -1;
+    }
+    if (mw_key_pressed(it, MW_KEY_S)) {
+      velocityHorizontal[1] = 1;
+    }
+    if (mw_key_pressed(it, MW_KEY_A)) {
+      velocityHorizontal[0] = -1;
+    }
+    if (mw_key_pressed(it, MW_KEY_D)) {
+      velocityHorizontal[0] = 1;
+    }
+    if (mw_key_pressed(it, MW_KEY_E)) {
+      velocityVertical -= time.delta_time;
+    }
+    if (mw_key_pressed(it, MW_KEY_Q)) {
+      velocityVertical += time.delta_time;
+    }
+
+    vec3 forward = {0, 0, 1};
+    glm_quat_rotatev(rot[i], forward, forward);
+
+    vec3 right = {1, 0, 0};
+    glm_quat_rotatev(rot[i], right, right);
+
+    vec3 up = {0, 1, 0};
+    glm_quat_rotatev(rot[i], up, up);
+    glm_vec3_scale(up, velocityVertical, up);
+    glm_vec3_add(pos[i], up, pos[i]);
+
+    glm_vec2_normalize(velocityHorizontal);
+    glm_vec2_scale(velocityHorizontal, time.delta_time, velocityHorizontal);
+
+    vec3 velz;
+    glm_vec3_scale(forward, velocityHorizontal[1], velz);
+    glm_vec3_add(pos[i], velz, pos[i]);
+
+    vec3 velx;
+    glm_vec3_scale(right, velocityHorizontal[0], velx);
+    glm_vec3_add(pos[i], velx, pos[i]);
   }
 }
 
 int main() {
-  mw_engine_info info = {.title = "Sandbox", .size = {1800, 1200}};
+  mw_engine_info info = {.title = "Sandbox", .size = {1920 / 1.5, 1080 / 1.5}};
   mw_ctx* engine = mw_engine_create(info);
 
   uint64_t camComps[] = {MW_POSITION, MW_ROTATION, MW_CAMERA};
@@ -24,12 +76,18 @@ int main() {
   uint64_t cam = mw_engine_create_entity(engine);
   mw_build_transform_no_scale(engine, cam);
 
-  mw_camera* camComp = mw_build_camera(engine, cam, 0.1, 1000, 60);
+  mw_camera* camComp = mw_build_camera(engine, cam, 0.01, 1000, 60);
 
   mw_engine_set_main_camera_entity(engine, cam);
 
-  // mw_load_glb(engine, "../assets/models/suzzane.glb");
+  mw_position* camPos = mw_engine_get_component(engine, cam, MW_POSITION);
+  glm_vec3_copy((vec3){0, -0.4, 1}, *camPos);
+
+  glm_vec3_copy((vec3){0, 0, 0}, rotation);
+
   mw_load_glb(engine, "../assets/models/ABeautifulGame.glb");
+
+  mw_cursor_mode(engine, MW_CURSOR_LOCKED);
 
   mw_engine_run(engine);
   mw_engine_destroy(engine);

@@ -1,7 +1,7 @@
 #ifndef MW_TIME_H
 #define MW_TIME_H
 
-#include <ecs/mw_ecs.h>
+#include "ecs/mw_ecs.h"
 
 typedef struct mw_time {
   double time;

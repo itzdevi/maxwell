@@ -12,6 +12,10 @@ typedef struct mw_ctx {
   mw_renderer* renderer;
   ecs_world_t* ecs;
   uint64_t main_camera_entity;
+  double cursor_x;
+  double cursor_y;
+  double last_cursor_x;
+  double last_cursor_y;
 } mw_ctx;
 
 #endif

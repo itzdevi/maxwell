@@ -7,8 +7,20 @@
 #include "ecs/mw_mesh_renderer.h"
 #include "ecs/mw_transform.h"
 
+void update_mouse_position_data(mw_ctx* ctx) {
+  ctx->last_cursor_x = ctx->cursor_x;
+  ctx->last_cursor_y = ctx->cursor_y;
+
+  glfwGetCursorPos(ctx->window, &ctx->cursor_x, &ctx->cursor_y);
+}
+
 mw_ctx* mw_engine_create(mw_engine_info info) {
   mw_ctx* ctx = malloc(sizeof(mw_ctx));
+
+  ctx->cursor_x = -1;
+  ctx->cursor_y = -1;
+  ctx->last_cursor_x = -1;
+  ctx->last_cursor_y = -1;
 
   mw_engine_create_window(ctx, &info);
   mw_engine_create_renderer(ctx, info);
@@ -28,6 +40,7 @@ void mw_engine_run(mw_ctx* ctx) {
 
     mw_engine_window_update(ctx);
 
+    update_mouse_position_data(ctx);
     mw_engine_ecs_update(ctx, dt);
 
     mw_engine_renderer_draw(ctx);
