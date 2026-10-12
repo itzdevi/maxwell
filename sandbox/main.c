@@ -1,6 +1,7 @@
 #include <maxwell.h>
 
 vec3 rotation;
+float zoomProgress = 0;
 
 void camera_controller(mw_iter* it) {
   mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
@@ -20,7 +21,6 @@ void camera_controller(mw_iter* it) {
 
     vec2 velocityHorizontal;
     glm_vec2_zero(velocityHorizontal);
-    float velocityVertical;
 
     if (mw_key_pressed(it, MW_KEY_W)) {
       velocityHorizontal[1] = -1;
@@ -34,29 +34,32 @@ void camera_controller(mw_iter* it) {
     if (mw_key_pressed(it, MW_KEY_D)) {
       velocityHorizontal[0] = 1;
     }
-    if (mw_key_pressed(it, MW_KEY_E)) {
-      velocityVertical -= time.delta_time;
+
+    if (mw_key_pressed(it, MW_KEY_C)) {
+      zoomProgress += time.delta_time * 7;
+    } else {
+      zoomProgress -= time.delta_time * 7;
     }
-    if (mw_key_pressed(it, MW_KEY_Q)) {
-      velocityVertical += time.delta_time;
-    }
+    zoomProgress = glm_clamp_zo(zoomProgress);
+
+    camera[i].fov = glm_lerp(60, 10, glm_ease_cubic_inout(zoomProgress));
 
     vec3 forward = {0, 0, 1};
     glm_quat_rotatev(rot[i], forward, forward);
 
+    vec3 forwardHorizontal;
+    glm_vec3_copy(forward, forwardHorizontal);
+    forwardHorizontal[1] = 0;
+    glm_vec3_normalize(forwardHorizontal);
+
     vec3 right = {1, 0, 0};
     glm_quat_rotatev(rot[i], right, right);
-
-    vec3 up = {0, 1, 0};
-    glm_quat_rotatev(rot[i], up, up);
-    glm_vec3_scale(up, velocityVertical, up);
-    glm_vec3_add(pos[i], up, pos[i]);
 
     glm_vec2_normalize(velocityHorizontal);
     glm_vec2_scale(velocityHorizontal, time.delta_time, velocityHorizontal);
 
     vec3 velz;
-    glm_vec3_scale(forward, velocityHorizontal[1], velz);
+    glm_vec3_scale(forwardHorizontal, velocityHorizontal[1], velz);
     glm_vec3_add(pos[i], velz, pos[i]);
 
     vec3 velx;
@@ -83,7 +86,7 @@ int main() {
   mw_position* camPos = mw_engine_get_component(engine, cam, MW_POSITION);
   glm_vec3_copy((vec3){0, -0.4, 1}, *camPos);
 
-  glm_vec3_copy((vec3){0, 0, 0}, rotation);
+  glm_vec3_zero(rotation);
 
   mw_load_glb(engine, "../assets/models/ABeautifulGame.glb");
 
