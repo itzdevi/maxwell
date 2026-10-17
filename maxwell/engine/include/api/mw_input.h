@@ -4,9 +4,11 @@
 #include "ecs/mw_ecs.h"
 #include "mw_context.h"
 
-int mw_key_pressed(mw_iter* it, int key);
+int mw_key_pressed(mw_ctx* ctx, int key);
+int mw_key_pressed_it(mw_iter* it, int key);
 void mw_mouse_position(mw_iter* it, vec2 dest);
-void mw_mouse_delta(mw_iter* it, vec2 dest);
+void mw_mouse_delta(mw_ctx* ctx, vec2 dest);
+void mw_mouse_delta_it(mw_iter* it, vec2 dest);
 void mw_cursor_mode_it(mw_iter* it, int mode);
 void mw_cursor_mode(mw_ctx* ctx, int mode);
 

@@ -1,5 +1,7 @@
 #include "ecs/mw_ecs.h"
 
+#include <stdlib.h>
+
 #include "core/mw_engine_def.h"
 #include "ecs/mw_camera.h"
 #include "ecs/mw_mesh_renderer.h"
@@ -13,6 +15,35 @@ uint64_t MW_COMPONENT_ANGULAR_VELOCITY;
 uint64_t MW_COMPONENT_MESH_RENDERER;
 uint64_t MW_COMPONENT_CAMERA;
 
+void system_runner(mw_iter* it) {
+  mw_system_callback callback = it->ctx;
+  if (!callback) return;
+
+  int8_t field_count = it->field_count;
+
+  void* columns[field_count];
+  for (int8_t c = 0; c < field_count; c++) {
+    columns[c] = ecs_field_w_size(it, it->sizes[c], c);
+  }
+
+  void* ptrs[field_count];
+  for (int32_t i = 0; i < it->count; i++) {
+    uint64_t entity = it->entities[i];
+
+    for (int8_t c = 0; c < field_count; c++) {
+      ptrs[c] = columns[c];
+    }
+
+    mw_comps comps = {
+        .ptrs = ptrs,
+        .ids = it->ids,
+        .count = (size_t)field_count,
+    };
+
+    callback(mw_engine_get_ctx(it), entity, &comps);
+  }
+}
+
 void mw_engine_init_ecs(mw_ctx* ctx) {
   ctx->ecs = ecs_init();
   ecs_set_ctx(ctx->ecs, ctx, NULL);
@@ -25,7 +56,6 @@ void mw_engine_init_ecs(mw_ctx* ctx) {
   ECS_COMPONENT(ctx->ecs, mw_mesh_renderer);
   ECS_COMPONENT(ctx->ecs, mw_camera);
 
-  // Map Flecs internal IDs to our public variables
   MW_COMPONENT_POSITION = ecs_id(mw_position);
   MW_COMPONENT_ROTATION = ecs_id(mw_rotation);
   MW_COMPONENT_SCALE = ecs_id(mw_scale);
@@ -34,7 +64,7 @@ void mw_engine_init_ecs(mw_ctx* ctx) {
   MW_COMPONENT_MESH_RENDERER = ecs_id(mw_mesh_renderer);
   MW_COMPONENT_CAMERA = ecs_id(mw_camera);
 
-  mw_engine_add_system(
+  mw_engine_add_system_iter(
       ctx, "mesh_renderer", mw_engine_system_draw_mesh,
       (uint64_t[]){MW_COMPONENT_POSITION, MW_COMPONENT_ROTATION,
                    MW_COMPONENT_SCALE, MW_COMPONENT_MESH_RENDERER},
@@ -55,13 +85,29 @@ void* mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
 
 mw_ctx* mw_engine_get_ctx(mw_iter* it) { return ecs_get_ctx(it->world); }
 
+void mw_engine_add_system_iter(mw_ctx* ctx, const char* name,
+                               mw_system_iter_callback callback,
+                               uint64_t* components, size_t count) {
+  ecs_system_desc_t desc = {0};
+  desc.entity = ecs_entity(ctx->ecs, {.name = name});
+  desc.phase = EcsOnUpdate;
+  desc.callback = callback;
+
+  for (size_t i = 0; i < count; i++) {
+    desc.query.terms[i].id = components[i];
+  }
+
+  ecs_system_init(ctx->ecs, &desc);
+}
+
 void mw_engine_add_system(mw_ctx* ctx, const char* name,
                           mw_system_callback callback, uint64_t* components,
                           size_t count) {
   ecs_system_desc_t desc = {0};
   desc.entity = ecs_entity(ctx->ecs, {.name = name});
   desc.phase = EcsOnUpdate;
-  desc.callback = callback;
+  desc.callback = system_runner;
+  desc.ctx = (void*)callback;
 
   for (size_t i = 0; i < count; i++) {
     desc.query.terms[i].id = components[i];

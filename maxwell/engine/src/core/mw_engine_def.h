@@ -6,6 +6,7 @@
 #include <mw_renderer.h>
 
 #include "ecs/mw_camera.h"
+#include "ecs/mw_ecs.h"
 
 typedef struct mw_ctx {
   GLFWwindow* window;
