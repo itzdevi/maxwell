@@ -9,6 +9,6 @@ typedef struct mw_time {
 } mw_time;
 
 mw_time mw_get_time(mw_ctx* ctx);
-mw_time mw_get_time_it(mw_iter* it);
+mw_time mw_get_time_it(it* it);
 
 #endif

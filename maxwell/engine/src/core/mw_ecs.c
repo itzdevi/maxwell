@@ -6,6 +6,7 @@
 #include "ecs/mw_camera.h"
 #include "ecs/mw_mesh_renderer.h"
 #include "ecs/mw_transform.h"
+#include "ecs/mw_velocity_solver.h"
 
 uint64_t MW_COMPONENT_POSITION;
 uint64_t MW_COMPONENT_ROTATION;
@@ -15,7 +16,7 @@ uint64_t MW_COMPONENT_ANGULAR_VELOCITY;
 uint64_t MW_COMPONENT_MESH_RENDERER;
 uint64_t MW_COMPONENT_CAMERA;
 
-void system_runner(mw_iter* it) {
+void system_runner(it* it) {
   mw_system_callback callback = it->ctx;
   if (!callback) return;
 
@@ -31,7 +32,7 @@ void system_runner(mw_iter* it) {
     uint64_t entity = it->entities[i];
 
     for (int8_t c = 0; c < field_count; c++) {
-      ptrs[c] = columns[c];
+      ptrs[c] = (char*)columns[c] + (i * it->sizes[c]);
     }
 
     mw_comps comps = {
@@ -69,6 +70,9 @@ void mw_engine_init_ecs(mw_ctx* ctx) {
       (uint64_t[]){MW_COMPONENT_POSITION, MW_COMPONENT_ROTATION,
                    MW_COMPONENT_SCALE, MW_COMPONENT_MESH_RENDERER},
       4);
+  mw_engine_add_system_iter(
+      ctx, "velocity_solver", mw_velocity_solver,
+      (uint64_t[]){MW_COMPONENT_POSITION, MW_COMPONENT_VELOCITY}, 2);
 }
 
 void mw_engine_ecs_update(mw_ctx* ctx, double dt) {
@@ -83,7 +87,7 @@ void* mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
   return (void*)ecs_get_id(ctx->ecs, entity, component);
 }
 
-mw_ctx* mw_engine_get_ctx(mw_iter* it) { return ecs_get_ctx(it->world); }
+mw_ctx* mw_engine_get_ctx(it* it) { return ecs_get_ctx(it->world); }
 
 void mw_engine_add_system_iter(mw_ctx* ctx, const char* name,
                                mw_system_iter_callback callback,
@@ -116,7 +120,7 @@ void mw_engine_add_system(mw_ctx* ctx, const char* name,
   ecs_system_init(ctx->ecs, &desc);
 }
 
-void* mw_engine_get_field(mw_iter* it, size_t size, int index) {
+void* mw_engine_get_field(it* it, size_t size, int index) {
   return ecs_field_w_size(it, size, index);
 }
 
@@ -125,12 +129,11 @@ void* mw_engine_get_component(mw_ctx* ctx, uint64_t entity,
   return (void*)ecs_get_id(ctx->ecs, entity, component);
 }
 
-void* mw_engine_get_component_it(mw_iter* it, uint64_t entity,
-                                 uint64_t component) {
+void* mw_engine_get_component_it(it* it, uint64_t entity, uint64_t component) {
   return (void*)ecs_get_id(it->world, entity, component);
 }
 
-uint32_t mw_engine_get_iter_count(mw_iter* it) { return it->count; }
+uint32_t mw_engine_get_iter_count(it* it) { return it->count; }
 
 void mw_engine_set_main_camera_entity(mw_ctx* ctx, uint64_t entity) {
   ctx->main_camera_entity = entity;

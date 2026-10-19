@@ -6,7 +6,7 @@
 
 #include "mw_context.h"
 
-typedef struct ecs_iter_t mw_iter;
+typedef struct ecs_iter_t it;
 
 typedef struct mw_comps {
   void** ptrs;
@@ -17,7 +17,7 @@ typedef struct mw_comps {
 typedef void (*mw_system_callback)(mw_ctx* ctx, uint64_t entity,
                                    mw_comps* comps);
 
-typedef void (*mw_system_iter_callback)(mw_iter* iter);
+typedef void (*mw_system_iter_callback)(it* iter);
 
 #define MW_SYSTEM_ITER_CREATE(ctx, name, callback, components) \
   mw_engine_add_system_iter(ctx, name, callback, components,   \
@@ -36,18 +36,17 @@ void mw_engine_ecs_update(mw_ctx* ctx, double dt);
 uint64_t mw_engine_create_entity(mw_ctx* ctx);
 void* mw_engine_entity_add_component(mw_ctx* ctx, uint64_t entity,
                                      uint64_t component);
-mw_ctx* mw_engine_get_ctx(mw_iter* it);
+mw_ctx* mw_engine_get_ctx(it* it);
 void mw_engine_add_system_iter(mw_ctx* ctx, const char* name,
                                mw_system_iter_callback callback,
                                uint64_t* components, size_t count);
 void mw_engine_add_system(mw_ctx* ctx, const char* name,
                           mw_system_callback callback, uint64_t* components,
                           size_t count);
-void* mw_engine_get_field(mw_iter* it, size_t size, int index);
+void* mw_engine_get_field(it* it, size_t size, int index);
 void* mw_engine_get_component(mw_ctx* ctx, uint64_t entity, uint64_t component);
-void* mw_engine_get_component_it(mw_iter* it, uint64_t entity,
-                                 uint64_t component);
-uint32_t mw_engine_get_iter_count(mw_iter* it);
+void* mw_engine_get_component_it(it* it, uint64_t entity, uint64_t component);
+uint32_t mw_engine_get_iter_count(it* it);
 
 void mw_engine_set_main_camera_entity(mw_ctx* ctx, uint64_t entity);
 

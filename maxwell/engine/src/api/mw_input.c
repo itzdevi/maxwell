@@ -8,11 +8,9 @@ int mw_key_pressed(mw_ctx* ctx, int key) {
   return glfwGetKey(ctx->window, key);
 }
 
-int mw_key_pressed_it(mw_iter* it, int key) {
-  return mw_key_pressed(it->ctx, key);
-}
+int mw_key_pressed_it(it* it, int key) { return mw_key_pressed(it->ctx, key); }
 
-void mw_mouse_position(mw_iter* it, vec2 dest) {
+void mw_mouse_position(it* it, vec2 dest) {
   mw_ctx* ctx = mw_engine_get_ctx(it);
 
   glm_vec2_copy((vec2){ctx->cursor_x, ctx->cursor_y}, dest);
@@ -29,12 +27,12 @@ void mw_mouse_delta(mw_ctx* ctx, vec2 dest) {
                 dest);
 }
 
-void mw_mouse_delta_it(mw_iter* it, vec2 dest) {
+void mw_mouse_delta_it(it* it, vec2 dest) {
   mw_ctx* ctx = mw_engine_get_ctx(it);
   mw_mouse_delta(ctx, dest);
 }
 
-void mw_cursor_mode_it(mw_iter* it, int mode) {
+void mw_cursor_mode_it(it* it, int mode) {
   mw_cursor_mode(mw_engine_get_ctx(it), mode);
 }
 

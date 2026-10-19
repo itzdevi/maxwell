@@ -8,7 +8,7 @@
 #include "ecs/mw_ecs.h"
 #include "ecs/mw_transform.h"
 
-void mw_engine_system_draw_mesh(mw_iter* it) {
+void mw_engine_system_draw_mesh(it* it) {
   mw_ctx* ctx = mw_engine_get_ctx(it);
   mw_position* pos = mw_engine_get_field(it, sizeof(mw_position), 0);
   mw_rotation* rot = mw_engine_get_field(it, sizeof(mw_rotation), 1);
