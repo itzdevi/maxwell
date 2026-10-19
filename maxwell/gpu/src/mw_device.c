@@ -77,6 +77,13 @@ mw_device mw_gpu_create_device(VkPhysicalDevice physicalDevice,
       sizeof(deviceExtensions) / sizeof(deviceExtensions[0]);
   createInfo.ppEnabledExtensionNames = deviceExtensions;
 
+  VkPhysicalDeviceVulkan13Features features13 = {0};
+  features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+  features13.dynamicRendering = VK_TRUE;
+  features13.synchronization2 = VK_TRUE;
+
+  createInfo.pNext = &features13;
+
   MW_ASSERT(vkCreateDevice(physicalDevice, &createInfo, NULL, &device.device) ==
             VK_SUCCESS);
 

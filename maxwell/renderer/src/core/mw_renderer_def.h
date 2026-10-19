@@ -16,7 +16,6 @@ typedef struct mw_renderer {
   VkSurfaceKHR surface;
   mw_swapchain swapchain;
   mw_pipeline pipeline;
-  VkFramebuffer* framebuffers;
   mw_command draw_command;
   mw_command transfer_command;
   mw_sync_objects sync_objects;

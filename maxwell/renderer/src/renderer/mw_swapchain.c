@@ -7,7 +7,6 @@
 #include <stdlib.h>
 
 #include "core/mw_renderer_def.h"
-#include "mw_framebuffer.h"
 #include "resources/mw_buffer.h"
 
 VkSurfaceFormatKHR mw_choose_swap_surface_format(
@@ -225,7 +224,7 @@ void mw_renderer_destroy_swapchain(mw_renderer* renderer) {
                        renderer->swapchain.image_views[i], NULL);
 
   vkDestroyImageView(renderer->gpu.device.device,
-                    renderer->swapchain.depth_image_view, NULL);
+                     renderer->swapchain.depth_image_view, NULL);
   vkDestroyImage(renderer->gpu.device.device, renderer->swapchain.depth_image,
                  NULL);
   vkFreeMemory(renderer->gpu.device.device,

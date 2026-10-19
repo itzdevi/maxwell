@@ -3,7 +3,6 @@ add_library(renderer STATIC
     src/core/mw_surface.c
     src/renderer/mw_swapchain.c
     src/renderer/mw_pipeline.c
-    src/renderer/mw_framebuffer.c
     src/renderer/mw_sync_objects.c
     src/renderer/mw_vertex.c
     src/renderer/mw_render_queue.c

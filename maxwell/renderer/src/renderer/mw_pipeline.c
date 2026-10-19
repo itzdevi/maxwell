@@ -19,76 +19,8 @@ VkShaderModule mw_create_shader_module(VkDevice device, const char* code,
   return shaderModule;
 }
 
-VkRenderPass mw_create_render_pass(VkDevice device,
-                                   VkFormat swapchainImageFormat,
-                                   VkFormat swapchainDepthFormat) {
-  VkAttachmentDescription colorAttachment = {0};
-  colorAttachment.format = swapchainImageFormat;
-  colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-  colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-  colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-  colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-  colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-  VkAttachmentDescription depthAttachment = {0};
-  depthAttachment.format = swapchainDepthFormat;
-  depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-  depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-  depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-  depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-  depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  depthAttachment.finalLayout =
-      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-  VkAttachmentReference colorAttachmentRef = {0};
-  colorAttachmentRef.attachment = 0;
-  colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-  VkAttachmentReference depthAttachmentRef = {0};
-  depthAttachmentRef.attachment = 1;
-  depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-  VkSubpassDescription subpass = {0};
-  subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-  subpass.colorAttachmentCount = 1;
-  subpass.pColorAttachments = &colorAttachmentRef;
-  subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-  VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
-
-  VkRenderPassCreateInfo renderPassCreateInfo = {0};
-  renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-  renderPassCreateInfo.attachmentCount = 2;
-  renderPassCreateInfo.pAttachments = attachments;
-  renderPassCreateInfo.subpassCount = 1;
-  renderPassCreateInfo.pSubpasses = &subpass;
-
-  VkSubpassDependency dependency = {0};
-  dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-  dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.srcAccessMask = 0;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-  renderPassCreateInfo.dependencyCount = 1;
-  renderPassCreateInfo.pDependencies = &dependency;
-
-  VkRenderPass renderPass;
-  MW_ASSERT(vkCreateRenderPass(device, &renderPassCreateInfo, NULL,
-                               &renderPass) == VK_SUCCESS);
-
-  return renderPass;
-}
-
 void mw_renderer_create_pipeline(mw_renderer* renderer) {
   mw_pipeline pipeline;
-  pipeline.render_pass = mw_create_render_pass(renderer->gpu.device.device,
-                                              renderer->swapchain.image_format,
-                                              renderer->swapchain.depth_format);
 
   unsigned int vertSize = 0;
   unsigned int fragSize = 0;
@@ -232,7 +164,15 @@ void mw_renderer_create_pipeline(mw_renderer* renderer) {
   pipelineCreateInfo.pDepthStencilState = &depthStencil;
 
   pipelineCreateInfo.layout = pipeline.layout;
-  pipelineCreateInfo.renderPass = pipeline.render_pass;
+
+  VkPipelineRenderingCreateInfo renderingInfo = {0};
+  renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+  renderingInfo.colorAttachmentCount = 1;
+  renderingInfo.pColorAttachmentFormats = &renderer->swapchain.image_format;
+  renderingInfo.depthAttachmentFormat = renderer->swapchain.depth_format;
+
+  pipelineCreateInfo.pNext = &renderingInfo;
+  pipelineCreateInfo.renderPass = VK_NULL_HANDLE;
   pipelineCreateInfo.subpass = 0;
 
   MW_ASSERT(vkCreateGraphicsPipelines(renderer->gpu.device.device,
@@ -253,6 +193,6 @@ void mw_renderer_destroy_pipeline(mw_renderer* renderer) {
                     NULL);
   vkDestroyPipelineLayout(renderer->gpu.device.device,
                           renderer->pipeline.layout, NULL);
-  vkDestroyRenderPass(renderer->gpu.device.device,
-                      renderer->pipeline.render_pass, NULL);
+  //   vkDestroyRenderPass(renderer->gpu.device.device,
+  //                       renderer->pipeline.render_pass, NULL);
 }

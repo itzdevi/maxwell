@@ -8,7 +8,6 @@
 #include "commands/mw_draw_command.h"
 #include "core/mw_renderer_def.h"
 #include "core/mw_surface.h"
-#include "renderer/mw_framebuffer.h"
 #include "renderer/mw_pipeline.h"
 #include "renderer/mw_render_queue.h"
 #include "renderer/mw_swapchain.h"
@@ -25,13 +24,10 @@ void mw_recreate_swapchain(mw_renderer* renderer) {
   mw_gpu_destroy_command(renderer->gpu.device, renderer->draw_command);
   mw_renderer_destroy_sync_objects(renderer->gpu.device,
                                    renderer->sync_objects);
-  mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
-                                   renderer->framebuffers);
   mw_renderer_destroy_pipeline(renderer);
 
   mw_renderer_create_swapchain(renderer);
   mw_renderer_create_pipeline(renderer);
-  mw_renderer_create_framebuffers(renderer);
   renderer->draw_command =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, MAX_FRAMES_IN_FLIGHT, GRAPHICS);
@@ -58,7 +54,6 @@ mw_renderer* mw_renderer_initialize(mw_renderer_config config) {
   mw_renderer_create_swapchain(renderer);
 
   mw_renderer_create_pipeline(renderer);
-  mw_renderer_create_framebuffers(renderer);
   renderer->transfer_command =
       mw_gpu_create_command(renderer->gpu.device, renderer->gpu.physicalDevice,
                             renderer->surface, 1, TRANSFER);
@@ -89,8 +84,6 @@ void mw_renderer_destroy(mw_renderer* renderer) {
                                    renderer->sync_objects);
   mw_gpu_destroy_command(renderer->gpu.device, renderer->draw_command);
   mw_gpu_destroy_command(renderer->gpu.device, renderer->transfer_command);
-  mw_renderer_destroy_framebuffers(renderer->gpu.device, renderer->swapchain,
-                                   renderer->framebuffers);
   mw_renderer_destroy_pipeline(renderer);
   mw_renderer_destroy_swapchain(renderer);
 

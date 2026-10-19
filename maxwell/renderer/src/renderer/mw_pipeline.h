@@ -10,7 +10,6 @@
 typedef struct mw_pipeline {
   VkPipeline pipeline;
   VkPipelineLayout layout;
-  VkRenderPass render_pass;
 } mw_pipeline;
 
 void mw_renderer_create_pipeline(mw_renderer* renderer);
