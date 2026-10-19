@@ -12,7 +12,7 @@ void mw_renderer_create_render_page(mw_renderer* renderer) {
       realloc(renderer->render_pages,
               (renderer->render_page_count + 1) * sizeof(mw_render_page));
   renderer->render_pages[renderer->render_page_count].passes =
-      malloc(sizeof(mw_render_pass) * RENDER_QUEUE_PAGE_SIZE);
+      malloc(sizeof(mw_draw_item) * RENDER_QUEUE_PAGE_SIZE);
   renderer->render_pages[renderer->render_page_count].length = 0;
   renderer->render_page_count++;
 }
@@ -33,8 +33,8 @@ void mw_renderer_clean_render_queue(mw_renderer* renderer) {
   renderer->current_page_offset = 0;
 }
 
-void mw_renderer_push_render_pass(mw_renderer* renderer,
-                                  mw_render_pass renderPass) {
+void mw_renderer_push_draw_item(mw_renderer* renderer,
+                                mw_draw_item renderPass) {
   if (!renderer->render_page_count) mw_renderer_create_render_page(renderer);
 
   if (renderer->render_pages[renderer->current_push_page].length ==
@@ -49,8 +49,7 @@ void mw_renderer_push_render_pass(mw_renderer* renderer,
   currentPage->passes[currentPage->length++] = renderPass;
 }
 
-int mw_renderer_pop_render_pass(mw_renderer* renderer,
-                                mw_render_pass* renderPass) {
+int mw_renderer_pop_draw_item(mw_renderer* renderer, mw_draw_item* renderPass) {
   if (!renderer->render_page_count) return 0;
 
   mw_render_page* currentPage =

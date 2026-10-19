@@ -107,13 +107,13 @@ void mw_renderer_record_draw_command_buffer(mw_renderer* renderer,
   vkCmdBindIndexBuffer(currentCommandBuffer, renderer->index_buffer.buffer, 0,
                        VK_INDEX_TYPE_UINT32);
 
-  mw_render_pass renderPass;
-  while (mw_renderer_pop_render_pass(renderer, &renderPass)) {
-    mw_mesh mesh = renderer->meshes[renderPass.mesh_index];
+  mw_draw_item drawItem;
+  while (mw_renderer_pop_draw_item(renderer, &drawItem)) {
+    mw_mesh mesh = renderer->meshes[drawItem.mesh_index];
 
     mw_push_constants_data pushConstants = mw_renderer_get_push_constants(
-        renderer, renderPass.transform, renderPass.view, renderPass.proj,
-        renderPass.viewPos);
+        renderer, drawItem.transform, drawItem.view, drawItem.proj,
+        drawItem.viewPos);
 
     vkCmdPushConstants(currentCommandBuffer, renderer->pipeline.layout,
                        VK_SHADER_STAGE_VERTEX_BIT, 0,

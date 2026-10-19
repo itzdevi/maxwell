@@ -18,13 +18,13 @@ typedef struct mw_renderer_config {
   void* window;
 } mw_renderer_config;
 
-typedef struct mw_render_pass {
+typedef struct mw_draw_item {
   uint32_t mesh_index;
   mat4 transform;
   mat4 view;
   mat4 proj;
   vec3 viewPos;
-} mw_render_pass;
+} mw_draw_item;
 
 typedef struct mw_renderer mw_renderer;
 
@@ -34,8 +34,8 @@ void mw_renderer_destroy(mw_renderer* renderer);
 void mw_renderer_draw_frame(mw_renderer* renderer);
 void mw_renderer_wait_for_idle(mw_renderer* renderer);
 void mw_renderer_set_framebuffer_size(mw_renderer* renderer, vec2 size);
-void mw_renderer_push_render_pass(mw_renderer* renderer,
-                                  mw_render_pass render_pass);
+void mw_renderer_push_draw_item(mw_renderer* renderer,
+                                mw_draw_item render_pass);
 uint32_t mw_renderer_add_mesh(mw_renderer* renderer, mw_vertex* vertices,
                               uint32_t vertices_count, uint32_t* indices,
                               uint32_t indices_count);
