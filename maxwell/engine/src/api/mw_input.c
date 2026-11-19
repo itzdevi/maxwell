@@ -1,6 +1,7 @@
 #include "api/mw_input.h"
 
-#include <glfw/glfw3.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #include "core/mw_engine_def.h"
 

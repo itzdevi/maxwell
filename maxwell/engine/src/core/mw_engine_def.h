@@ -1,6 +1,7 @@
 #ifndef MW_ENGINE_DEF_H
 #define MW_ENGINE_DEF_H
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <flecs.h>
 #include <mw_renderer.h>
